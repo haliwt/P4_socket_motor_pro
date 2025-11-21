@@ -31,21 +31,16 @@
 #include "bsp_power.h"
 
 #include "bsp_key.h"
+#include "bsp_motor.h"
 
 #include "bsp_power_meter.h"
 #include "bsp_usb_meter.h"
-
-
-
-
+#include "bsp_eeprom.h"
 #include "bsp_buzzer.h"
 #include "bsp_adc.h"
-
-
+#include "bsp_hlw8032.h"
 
 #include "interrupt_manager.h"
-
-
 
 
 
@@ -87,13 +82,7 @@ extern uint8_t inputBuf[1];
 
 
 
-typedef enum{
 
-
-  power_off,
-  power_on
-
-}power_state_t;
 
 
 typedef struct PROCESS_T{

@@ -49,12 +49,22 @@ void TM1639_Init(void)
     TM1639_SendCommand(0x40);
 
     // 设置显示开，亮度最大
-    TM1639_SendCommand(0x8F);
+    TM1639_SendCommand(OpenDispTM1639);
 
     // 清屏
     for (uint8_t i = 0; i < 16; i++) {
         TM1639_WriteData(i, 0x00);
     }
 }
+//---turn off display ----
+void TM1639_donotDisplay(void)
+{
+
+	// 设置显示关闭
+	 TM1639_SendCommand(CloseDispTM1639);
+
+
+}
+
 
 

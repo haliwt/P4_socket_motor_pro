@@ -31,7 +31,7 @@ static TaskHandle_t xHandleTaskStart = NULL;
 
 
 uint8_t power_on_sound_flag ;
-
+uint8_t key_value;
 /**********************************************************************************************************
 *
 *	Function Name:void freeRTOS_Handler(void)
@@ -63,9 +63,15 @@ static void vTaskMsgPro(void *pvParameters)
   
 	while(1)
     {
+       if(power_on_sound_flag==0){
+            power_on_sound_flag ++;
+            buzzer_sound();//buzzer_sound();
+			
+
+        }
       
       main_process_handler();
-	  vTaskDelay(pdMS_TO_TICKS(20));		                                   
+	  vTaskDelay(pdMS_TO_TICKS(10));		                                   
  	}
 }	
 
@@ -77,22 +83,15 @@ static void vTaskMsgPro(void *pvParameters)
  */
 static void vTaskStart(void *pvParameters)
 {
-    
-
-	while(1)
+    while(1)
     {
   
-       	if(power_on_sound_flag==0){
-            power_on_sound_flag ++;
-            buzzer_sound();//buzzer_sound();
-			
+        key_value = key_scan();
+		key_parse_value(key_value);
 
-        }
-       key_handler();
-
-       vTaskDelay(pdMS_TO_TICKS(20))
-       
-    }
+        vTaskDelay(pdMS_TO_TICKS(20))
+	} 
+}
  /**
  * @brief  :  void AppTaskCreate (void)�����ݴ����������ȼ�Ϊ�е�
  * @note    �����ڲ�ʹ�ö��н������ݣ����ȳ�ʼ������

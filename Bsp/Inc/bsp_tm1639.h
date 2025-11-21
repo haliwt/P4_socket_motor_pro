@@ -26,6 +26,7 @@
 
 void TM1639_Init(void);
 
+void TM1639_donotDisplay(void);
 
 void TM1639_WriteData(uint8_t addr, uint8_t data);
 

@@ -140,12 +140,14 @@ void DMA1_Channel2_3_IRQHandler(void)
 void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
-   if(LL_DMA_IsActiveFlag_TC4(DMA1))LL_DMA_ClearFlag_TC4(DMA1);
-    if(LL_DMA_IsActiveFlag_TC5(DMA1))LL_DMA_ClearFlag_TC5(DMA1);
+   if(LL_DMA_IsActiveFlag_TC4(DMA1)){
+     	LL_DMA_ClearFlag_TC4(DMA1);
+		hlw8032_rx_done=1;// 一帧接收完成
+   	}
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
   if(LL_DMA_IsActiveFlag_TE4(DMA1)) LL_DMA_ClearFlag_TE4(DMA1);
-  if(LL_DMA_IsActiveFlag_TE5(DMA1)) LL_DMA_ClearFlag_TE5(DMA1);
+  
 
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
 }

@@ -3,33 +3,22 @@
 
 #define SAMPLE_COUNT 6
 
-//uint16_t mean_fan_buf[SAMPLE_COUNT];  // 存放5次采样值
-//uint8_t fan_counter = 0;              // 当前存储位置
-//uint8_t sample_ready = 0;             // 标记是否采满5次
-
 
 // ADC相关变量定义
 #define ADC_BUFFER_SIZE 1
 volatile uint16_t adc_buffer[ADC_BUFFER_SIZE]; // DMA传输缓冲区
-volatile uint8_t adc_conversion_complete = 0;
+//volatile uint8_t adc_conversion_complete = 0;
 
 
 /* USER CODE BEGIN 0 */
 
 
-
-
-uint16_t fan_detect_voltage = 1000;
-uint16_t ptc_detect_voltage;
+uint16_t motor_detect_voltage ;
 
 
 static uint16_t compute_voltage(uint16_t raw_value) ;
-//static uint16_t ADC_FAN_ReadVoltage(void);
-//static uint16_t ADC_PTC_ReadVoltage(void);
-//static uint8_t ADC_StartConversion(void);
-static uint8_t ADC_DMA_StartConversion(void)
 
-static void ADC_GetValues(void);
+
 uint16_t mean_fan_buf[SAMPLE_COUNT];
 
 
@@ -41,14 +30,19 @@ uint16_t mean_fan_buf[SAMPLE_COUNT];
 	*Return Ref: NO
 	*
 **********************************************************************/
-void adc_detected_hundler(void)
+uint16_t  pinch_adc_detected_value(void)
 {
 
-	  
-	if(ADC_DMA_StartConversion()){
+  if(ADC_DMA_StartConversion()==0) return ;
+
+   if(ADC_DMA_StartConversion()){
 	   ADC_GetValues();
 	   		
-	  }
+   }
+   
+   motor_detect_voltage =	(adc_buffer[0] * 3300 )/4095;
+
+   return motor_detect_voltage ;
 }
 
 /*****************************************************************
@@ -77,7 +71,7 @@ static uint8_t ADC_DMA_StartConversion(void)
     
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ADC_BUFFER_SIZE);
     
-    adc_conversion_complete = 0;
+    
     
     // 使能DMA通道
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
@@ -88,13 +82,6 @@ static uint8_t ADC_DMA_StartConversion(void)
     return 1;
 }
 
-// 获取ADC转换结果
-void ADC_GetValues(void)
-{
-
-    fan_detect_voltage=	(adc_buffer[0] * 3300 )/4095;
-	
-}
 
 
 /*****************************************************************

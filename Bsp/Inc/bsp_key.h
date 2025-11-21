@@ -3,8 +3,12 @@
 #include "main.h"
 
 
+#define KEY_VALUE()    LL_GPIO_IsInputPinSet(KEY_GPIO_Port,KEY_Pin)
 
-void key_handler(void);
+uint8_t key_scan(void);
 
+void key_parse_value(uint8_t keyvalue);
+
+uint8_t get_key_value(void);
 #endif 
 
