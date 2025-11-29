@@ -90,7 +90,7 @@ typedef struct PROCESS_T{
 
   uint8_t gpower_flag;
   
-  
+  uint8_t gTimer_smg_counter;
 }process_t;
 
 extern process_t gpro_t;

@@ -2,6 +2,7 @@
 
 
 
+
 typedef struct process_run_t{
 
  uint8_t pro_read_key;
@@ -86,7 +87,7 @@ void main_process_handler(void)
 		    glpro_t.power_onoff_flag = power_off;
 			motor_stop();
 			TM1639_donotDisplay();
-		    LED_KEY_OFF() 
+		    LED_KEY_OFF() ;
 		
 
 		}
@@ -106,7 +107,6 @@ void main_process_handler(void)
 
    }
 
-	|
 }
 /*
 	*@brief: 

@@ -75,19 +75,6 @@
 
 
 
-// 数码管段码表�?0-9的显示码
-const uint8_t TM1639_Number_Table[] = {
-    0xF3, // 0: 0011 1111 --0x3F  （h,g,f,e,d,c,b,a--0x3F
-    0x60, // 1: 0000 0110 --0x06--写数据式从低位开始，向高位开始写
-    0xB5, // 2: 0101 1011 --0x5B
-    0xF4, // 3: 0100 1111 --0x4F
-    0x66, // 4: 0110 0110 --0x66
-    0xD6, // 5: 0110 1101 --0x6D
-    0xD7, // 6: 0111 1101  --0x7D 
-    0x70, // 7: 0000 0111  --0x07
-    0xF7, // 8: 0111 1111  --0x7F
-    0xF6  // 9: 0110 1111  --0x6F
-};
 
 
 
@@ -98,6 +85,7 @@ void TM1639_Init(void);
 
 void TM1639_Write_Digit_Full(uint8_t addr_h, uint8_t addr_l, uint8_t data);
 
+void TM1639_donotDisplay(void);
 
 
 #endif

@@ -1,5 +1,18 @@
 #include "bsp.h"
 
+// 数码管段码表�?0-9的显示码
+const uint8_t TM1639_Number_Table[] = {
+    0xF3, // 0: 0011 1111 --0x3F  （h,g,f,e,d,c,b,a--0x3F
+    0x60, // 1: 0000 0110 --0x06--写数据式从低位开始，向高位开始写
+    0xB5, // 2: 0101 1011 --0x5B
+    0xF4, // 3: 0100 1111 --0x4F
+    0x66, // 4: 0110 0110 --0x66
+    0xD6, // 5: 0110 1101 --0x6D
+    0xD7, // 6: 0111 1101  --0x7D 
+    0x70, // 7: 0000 0111  --0x07
+    0xF7, // 8: 0111 1111  --0x7F
+    0xF6  // 9: 0110 1111  --0x6F
+};
 
 // 字母和特殊字符显示码
 static const uint8_t TM1639_Char_Table[] = {
@@ -17,7 +30,7 @@ static const uint8_t TM1639_Char_Table[] = {
 #define TM1639_DOT 0x08 // 小数点段�?,from low position start
 
 static void TM1639_Display_ON_OFF(uint8_t status);
-static void TM1639_DISP_ALL_SMG_STATE(uitn8_t data);
+static void TM1639_DISP_ALL_SMG_STATE(uint8_t data);
 
 
 
@@ -152,12 +165,12 @@ void TM1639_Write_Digit_Full(uint8_t addr_h, uint8_t addr_l, uint8_t data)
  * @param  None
  * @retval None
  */
-void TM1639_DISP_ALL_SMG_STATE(uitn8_t data)
+void TM1639_DISP_ALL_SMG_STATE(uint8_t data)
 {
     // 关闭数码管显示（GRID1-GRID3�?
-    TM1639_Write_Digit_Full(TM1639_ADDR_DIG1_H, TM1639_ADDR_DIG1_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_DIG2_H, TM1639_ADDR_DIG2_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_DIG3_H, TM1639_ADDR_DIG3_L, 0x00);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID1_H, TM1639_ADDR_GRID1_L, 0x00);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID2_H, TM1639_ADDR_GRID2_L, 0x00);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID3_H, TM1639_ADDR_GRID3_L, 0x00);
 
     // 关闭LED显示（GRID4-GRID8�?
     TM1639_Write_Digit_Full(TM1639_ADDR_GRID4_H, TM1639_ADDR_GRID4_L, 0x00);
@@ -171,5 +184,15 @@ void TM1639_DISP_ALL_SMG_STATE(uitn8_t data)
 }
 
 
+
+void TM1639_donotDisplay(void)
+{
+
+	TM1639_Start();
+     TM1639_Write_Byte(TM1639_DONOT_DISPLAY);
+    TM1639_Stop();
+
+
+}
 
 

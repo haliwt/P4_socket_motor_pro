@@ -8,6 +8,7 @@ typedef struct {
     uint32_t voltage;
     uint32_t current;
     uint32_t power;
+	
 } HLW8032_Data;
 
 HLW8032_Data hlw_data;
@@ -137,5 +138,35 @@ void hlw_convert_tp(const hlw_regs_t *r, const hlw_cal_t *c,float *V, float *I, 
     *I = c->Ki * ri + c->Ib;
     *P = c->Kp * rp + c->Pb;
 }
+
+/*
+	*@brief:  
+	*@note:
+	*@param:
+	*@retval:
+*/
+uint16_t read_ac_voltage_value(void)
+{
+
+    return (uint16_t)hlw_data.voltage;
+
+}
+
+uint8_t read_total_kw_decade_value(void)
+{
+  
+   if(hlw_data.power > 0) return (uint8_t)hlw_data.power;
+   else return 0;
+   
+}
+
+uint8_t read_total_kw_uint_value(void)
+{
+  
+   if(hlw_data.power < 0) return (uint8_t)hlw_data.power;
+   
+}
+
+
 
 

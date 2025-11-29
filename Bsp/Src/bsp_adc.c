@@ -18,7 +18,7 @@ uint16_t motor_detect_voltage ;
 
 static uint16_t compute_voltage(uint16_t raw_value) ;
 
-
+static uint8_t ADC_DMA_StartConversion(void);
 uint16_t mean_fan_buf[SAMPLE_COUNT];
 
 
@@ -32,15 +32,18 @@ uint16_t mean_fan_buf[SAMPLE_COUNT];
 **********************************************************************/
 uint16_t  pinch_adc_detected_value(void)
 {
-
-  if(ADC_DMA_StartConversion()==0) return ;
+  static uint8_t adc_flag;
+  if(ADC_DMA_StartConversion()==0) return 0;
 
    if(ADC_DMA_StartConversion()){
 	   ADC_GetValues();
-	   		
+	   adc_flag =1;	
    }
-   
-   motor_detect_voltage =	(adc_buffer[0] * 3300 )/4095;
+   if(adc_flag ==1){
+	 adc_flag ++;  
+     motor_detect_voltage =	(adc_buffer[0] * 3300 )/4095;
+
+   }
 
    return motor_detect_voltage ;
 }

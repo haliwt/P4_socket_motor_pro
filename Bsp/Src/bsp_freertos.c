@@ -68,7 +68,7 @@ static void vTaskMsgPro(void *pvParameters)
             buzzer_sound();//buzzer_sound();
 			
 
-        }
+       }
       
       main_process_handler();
 	  vTaskDelay(pdMS_TO_TICKS(10));		                                   
@@ -89,7 +89,7 @@ static void vTaskStart(void *pvParameters)
         key_value = key_scan();
 		key_parse_value(key_value);
 
-        vTaskDelay(pdMS_TO_TICKS(20))
+        vTaskDelay(pdMS_TO_TICKS(20));
 	} 
 }
  /**
@@ -103,7 +103,7 @@ void AppTaskCreate (void)
 
 	xTaskCreate( vTaskMsgPro,     		/* 任务函数  */
                  "vTaskMsgPro",   		/* 任务�?1�?7?1�?1�?7?7    */
-                 128,            		/* 任务栈大小，单位word，也就是4字节 */
+                 256,            		/* 任务栈大小，单位word，也就是4字节 */
                  NULL,           		/* 任务参数  */
                  1,              		/* 任务优先�?1�?7?1�?1�?7?7 数�1�?7�?1�?7越小优先级越低，这个跟uCOS相反 */
                  &xHandleTaskMsgPro);   /* 任务句柄  */
