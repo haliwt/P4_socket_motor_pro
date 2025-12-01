@@ -11,6 +11,13 @@ typedef enum{
 
 }key_state_t;
 
+typedef enum{
+
+  KEY_PRESSED_NG,
+  KEY_PRESSED_OK
+
+}key_pressed_t;
+
 uint8_t key_scan(void);
 
 void key_parse_value(uint8_t keyvalue);

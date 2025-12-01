@@ -77,7 +77,7 @@ void works_disp_hanlder(void)
      switch(glsmg_t.smg_run_step){
 
 	 case smg_init:
-
+     TM1639_Init();
 	 glsmg_t.smg_run_step= smg_voltage;
 
 	 break;
@@ -86,7 +86,7 @@ void works_disp_hanlder(void)
       glsmg_t.read_ac_voltage= read_ac_voltage_value();
 	  disp_voltage_3bit_value(glsmg_t.read_ac_voltage);
 	  glsmg_t.smg_run_step = smg_kw;
-           
+      motor_detect_pinch();    
 	 break;
 
 	 case smg_kw:
@@ -101,7 +101,7 @@ void works_disp_hanlder(void)
 		    disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,0);
 
 		}
-
+        motor_detect_pinch();
 		glsmg_t.smg_run_step = smg_usb;
 	 break;
 
@@ -109,7 +109,7 @@ void works_disp_hanlder(void)
 
 	      glsmg_t.read_usb_w_value = read_usb_capacity_value(); 
 		  disp_usb_capacity_2bit_value(glsmg_t.read_usb_w_value);
-
+          motor_detect_pinch();
 		  glsmg_t.smg_run_step = smg_voltage;
 
 	 break;
@@ -199,4 +199,11 @@ void splitDigits(uint16_t number, uint8_t  *hundred, uint8_t *decade, uint8_t *u
 
 
 
+void smg_power_off_ref(void)
+{
+
+	glsmg_t.smg_run_step= smg_init;
+
+
+}
 

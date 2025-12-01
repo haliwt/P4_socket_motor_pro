@@ -134,6 +134,7 @@ static void TM1639_Display_ON_OFF(uint8_t status)
         TM1639_Write_Byte(TM1639_CMD_DISPLAY | TM1639_BRIGHTNESS_MAX);
     else
         TM1639_Write_Byte(TM1639_DONOT_DISPLAY);
+	    TM1639_Set_Brightness(TM1639_BRIGHTNESS_MAX);
     TM1639_Stop();
 }
 

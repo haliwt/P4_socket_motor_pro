@@ -16,6 +16,7 @@ void smg_Init(void);
 
 void works_disp_hanlder(void);
 
+void smg_power_off_ref(void);
 
 
 

@@ -19,10 +19,27 @@
 #define MOTOR_PINCH_VALUE()            LL_GPIO_IsInputPinSet(PINCH_GPIO_Port,PINCH_Pin)          
 
 
+typedef enum{
+
+  motor_run_null,
+  motor_run_is_stop,
+  motor_run_is_up,
+  motor_run_is_down,
+  motor_run_is_pause
+
+}motor_enum_t;
+
+
 void motor_run_up(void);
 void motor_run_down(void);
 
 void motor_stop(void);
 
+void motor_run_state(void);
+
+void motor_pause(void);
+
+void motor_detect_pinch(void);
+uint8_t motor_run_state_ref(void);
 
 #endif 
