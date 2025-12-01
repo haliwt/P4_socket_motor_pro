@@ -28,8 +28,6 @@ process_main_t glpro_t;
 void main_process_handler(void)
 {
 
- 
-
   if(gpro_t.gpower_flag == power_on){
 
 
@@ -66,13 +64,9 @@ void main_process_handler(void)
 
 	}
 
+	 //TM1639_Init();
 
 	  works_disp_hanlder();
-
-
-
-
-  
 
 
   } 

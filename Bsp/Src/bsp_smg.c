@@ -86,7 +86,8 @@ void works_disp_hanlder(void)
 	 case smg_voltage:
       glsmg_t.read_ac_voltage= read_ac_voltage_value();
 	  disp_voltage_3bit_value(glsmg_t.read_ac_voltage);
-	  motor_detect_pinch();    
+	  motor_detect_pinch(); 
+	  display_usb_kw_symbol();
 	  glsmg_t.smg_run_step = smg_kw;
     
 	 break;
@@ -103,7 +104,9 @@ void works_disp_hanlder(void)
 //		    disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,0);
 
 //		}
+        disp_capacity_2bit_kwvalue(0,1);
         motor_detect_pinch();
+	    display_usb_kw_symbol();
 		glsmg_t.smg_run_step = smg_usb;
 	 break;
 
@@ -112,13 +115,14 @@ void works_disp_hanlder(void)
 	      glsmg_t.read_usb_w_value = read_usb_capacity_value(); 
 		  disp_usb_capacity_2bit_value(glsmg_t.read_usb_w_value);
           motor_detect_pinch();
+		  display_usb_kw_symbol();
 		  glsmg_t.smg_run_step = smg_voltage;
 
 	 break;
 
      }
 
-
+  
 
 }
 /*
@@ -139,7 +143,7 @@ static void disp_voltage_3bit_value(uint16_t voltage)
   TM1639_Write_Digit_Full(TM1639_ADDR_GRID2_H, TM1639_ADDR_GRID2_L, segTab[vol_decade]);
   TM1639_Write_Digit_Full(TM1639_ADDR_GRID3_H, TM1639_ADDR_GRID3_L, segTab[vol_unit]);
 
-
+  
 }
 /*
 	*@brief: display kw of power capacity 
@@ -170,7 +174,7 @@ static void disp_capacity_2bit_kwvalue(uint8_t kwvalue,uint8_t decimal)
 
 	 }
 
-
+   
 }
 /*
 	*@brief: display kw of power capacity 
@@ -183,10 +187,10 @@ static void disp_usb_capacity_2bit_value(uint8_t usb_value)
      uint8_t usb_decade,usb_unit;
 
      usb_decade =  (usb_value  /10) %10;
-	 usb_unit =  usb_value  %10;
+	 usb_unit =  usb_value %10;
 	 
 	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID4_H, TM1639_ADDR_GRID4_L, segTab[usb_decade]);
-	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID7_H, TM1639_ADDR_GRID7_L, segTab[usb_unit]);
+	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID5_H, TM1639_ADDR_GRID5_L, segTab[usb_unit]);
 	 
 	
 }
@@ -209,3 +213,11 @@ void smg_power_off_ref(void)
 
 }
 
+
+void display_usb_kw_symbol(void)
+{
+
+  TM1639_Write_Digit_Full(TM1639_ADDR_GRID8_H, TM1639_ADDR_GRID8_L, seg_a|seg_b|seg_c|seg_d);
+ 
+
+}

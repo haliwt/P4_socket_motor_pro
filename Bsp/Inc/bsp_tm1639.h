@@ -33,7 +33,7 @@
 
 
 // TM1639 命令定义
-#define TM1639_CMD_DATA               0x40    // 数据命令
+//#define TM1639_CMD_DATA               0x40    // 数据命令
 #define TM1639_CMD_DISPLAY            0x88    // 显示控制命令
 #define TM1639_DONOT_DISPLAY          0x80    //  关闭显示
 

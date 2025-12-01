@@ -2,16 +2,26 @@
 
 // 数码管段码表�?0-9的显示码
 const uint8_t TM1639_Number_Table[] = {
-    0xF3, // 0: 0011 1111 --0x3F  （h,g,f,e,d,c,b,a--0x3F
-    0x60, // 1: 0000 0110 --0x06--写数据式从低位开始，向高位开始写
-    0xB5, // 2: 0101 1011 --0x5B
-    0xF4, // 3: 0100 1111 --0x4F
-    0x66, // 4: 0110 0110 --0x66
-    0xD6, // 5: 0110 1101 --0x6D
-    0xD7, // 6: 0111 1101  --0x7D 
-    0x70, // 7: 0000 0111  --0x07
-    0xF7, // 8: 0111 1111  --0x7F
-    0xF6  // 9: 0110 1111  --0x6F
+//    0xF3, // 0: 0011 1111 --0x3F  （h,g,f,e,d,c,b,a--0x3F
+//    0x60, // 1: 0000 0110 --0x06--写数据式从低位开始，向高位开始写
+//    0xB5, // 2: 0101 1011 --0x5B
+//    0xF4, // 3: 0100 1111 --0x4F
+//    0x66, // 4: 0110 0110 --0x66
+//    0xD6, // 5: 0110 1101 --0x6D
+//    0xD7, // 6: 0111 1101  --0x7D 
+//    0x70, // 7: 0000 0111  --0x07
+//    0xF7, // 8: 0111 1111  --0x7F
+//    0xF6  // 9: 0110 1111  --0x6F
+      0x3F, // 0
+	  0x06, // 1
+	  0x5B, // 2
+	  0x4F, // 3
+	  0x66, // 4
+	  0x6D, // 5
+	  0x7D, // 6
+	  0x07, // 7
+	  0x7F, // 8
+	  0x6F	// 9
 };
 
 // 字母和特殊字符显示码
@@ -32,8 +42,16 @@ static const uint8_t TM1639_Char_Table[] = {
 static void TM1639_Display_ON_OFF(uint8_t status);
 static void TM1639_DISP_ALL_SMG_STATE(uint8_t data);
 
+static void smg_delay_us(uint32_t us)
+{
+    // ćŻä¸Ş us éčŚĺ¤§çşŚ 16 ćŹĄĺžŞçŻďź64 cycles / 4 cycles per loopďź
+    uint32_t cycles = us * 16;//  
 
-
+    while(cycles--)
+    {
+        __NOP();
+    }
+}
 /**
  * @brief  TM1639写入�?个字�?
  * @param  byte: 要写入的字节
@@ -54,7 +72,7 @@ static void TM1639_Write_Byte(uint8_t byte)
             
        // delay_us(2);//is big error .DATA.2025.06.13
         TM1639_CLK_SetHigh();
-       // delay_us(2);//is big error .DATA.2025.06.13
+        smg_delay_us(4);//is big error .DATA.2025.06.13
         byte >>= 1;
     }
 }
@@ -67,11 +85,11 @@ static void TM1639_Write_Byte(uint8_t byte)
 static void TM1639_Start(void)
 {
     TM1639_STB_SetHigh();
-    delay_us(2);
+    smg_delay_us(8);
     TM1639_CLK_SetHigh();
-    delay_us(2);
+    smg_delay_us(8);
     TM1639_STB_SetLow();
-    delay_us(2);
+    smg_delay_us(8);
 }
 
 /**
@@ -82,11 +100,11 @@ static void TM1639_Start(void)
 static void TM1639_Stop(void)
 {
     TM1639_CLK_SetLow();
-    delay_us(2);
+    smg_delay_us(8);
     TM1639_DIO_SetLow();
-    delay_us(2);
+    smg_delay_us(8);
     TM1639_STB_SetHigh();
-    delay_us(2);
+    smg_delay_us(8);
 }
 
 /**
@@ -98,7 +116,7 @@ void TM1639_Init(void)
 {
     // 设置数据命令：自动地�?增加
     TM1639_Start();
-    TM1639_Write_Byte(TM1639_CMD_DATA);
+    TM1639_Write_Byte(AddrFixed);
     TM1639_Stop();
     
     // 设置显示控制：显示开，最大亮�?
@@ -168,17 +186,19 @@ void TM1639_Write_Digit_Full(uint8_t addr_h, uint8_t addr_l, uint8_t data)
  */
 void TM1639_DISP_ALL_SMG_STATE(uint8_t data)
 {
-    // 关闭数码管显示（GRID1-GRID3�?
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID1_H, TM1639_ADDR_GRID1_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID2_H, TM1639_ADDR_GRID2_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID3_H, TM1639_ADDR_GRID3_L, 0x00);
+    //display votlage value
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID1_H, TM1639_ADDR_GRID1_L, TM1639_Number_Table[0]);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID2_H, TM1639_ADDR_GRID2_L, TM1639_Number_Table[0]);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID3_H, TM1639_ADDR_GRID3_L, TM1639_Number_Table[0]);
 
-    // 关闭LED显示（GRID4-GRID8�?
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID4_H, TM1639_ADDR_GRID4_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID5_H, TM1639_ADDR_GRID5_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID6_H, TM1639_ADDR_GRID6_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID7_H, TM1639_ADDR_GRID7_L, 0x00);
-    TM1639_Write_Digit_Full(TM1639_ADDR_GRID8_H, TM1639_ADDR_GRID8_L, 0x00);
+    //USB W 
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID4_H, TM1639_ADDR_GRID4_L, TM1639_Number_Table[0]);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID5_H, TM1639_ADDR_GRID5_L, TM1639_Number_Table[0]);
+	//display KW value
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID6_H, TM1639_ADDR_GRID6_L, TM1639_Number_Table[0]);
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID7_H, TM1639_ADDR_GRID7_L, TM1639_Number_Table[0]);
+	//LED DISPLAY 
+    TM1639_Write_Digit_Full(TM1639_ADDR_GRID8_H, TM1639_ADDR_GRID8_L, TM1639_Number_Table[8]);
 
     // 关闭显示
     TM1639_Display_ON_OFF(data);

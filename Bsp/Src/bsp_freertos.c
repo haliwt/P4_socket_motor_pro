@@ -43,6 +43,7 @@ typedef struct{
 }freertos_run_t;
 
 freertos_run_t glrun_t;
+static void parse_key_handler(void);
 
 
 uint8_t power_on_sound_flag ;
@@ -78,7 +79,7 @@ static void vTaskMsgPro(void *pvParameters)
 //    BaseType_t xResult;
 //	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(30); /* 设置最大等待时间为500ms */
 //	uint32_t ulValue;
-	static uint8_t key_id_counter;
+	
 	while(1)
     {
        if(power_on_sound_flag==0){
@@ -135,64 +136,7 @@ static void vTaskMsgPro(void *pvParameters)
 	  }
       #endif 
 
-	  if(glrun_t.power_key_id == 0x01 && glrun_t.key_long_flag !=1){
-           glrun_t.power_key_counter++;
-          if(glrun_t.power_key_counter > 40 ){
-               glrun_t.power_key_counter=0;
-			   glrun_t.key_long_flag =1;
-			    glrun_t.power_key_id++;
-			   buzzer_sound();
-			   gpro_t.gTimer_key_counter=0;
-			   if(gpro_t.gpower_flag == power_off){
-			     gpro_t.gpower_flag = power_on;
-				 TM1639_Init();
-			   }
-			   else{
-			      gpro_t.gpower_flag = power_off;
-				  
-				  motor_pause();
-                  
-			   }
-    
-		 }
-		 else if(KEY_VALUE() ==KEY_UP && gpro_t.gpower_flag == power_on && glrun_t.key_long_flag !=1){
-               glrun_t.power_key_id++;
-			   glrun_t.power_key_counter=0;
-			   buzzer_sound();
-               key_id_counter = key_id_counter ^ 0x01;
-			   if(key_id_counter == 1){
-			   	 
-			     glrun_t.power_key_id = 1;
-
-				 motor_run_state();
-			   }
-			   else{
-
-			     glrun_t.power_key_id = 2;
-				 motor_pause();
-                  
-			   }
-
-
-		 }
-		 else if(gpro_t.gpower_flag == power_off &&  KEY_VALUE() ==KEY_UP && glrun_t.key_long_flag !=1){
-            glrun_t.power_key_counter=0;
-			glrun_t.power_key_id ++;
-			printf("key_counter =0 \r\n");
-	     }
-		 
-
-	  }
-	  
-    
-	  if(gpro_t.gTimer_key_counter > 1 && glrun_t.key_long_flag ==1){
-	     gpro_t.gTimer_key_counter =0;
-	      glrun_t.key_long_flag=0;
-	      glrun_t.power_key_id=0;
-          printf("key_long = 0\r\n");
-
-	  }
-	 
+	  parse_key_handler();
 	  main_process_handler();
 	  vTaskDelay(pdMS_TO_TICKS(20));	
       }
@@ -293,3 +237,68 @@ void freertos_set_prority(void)
 //	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
 //}
+
+static void parse_key_handler(void)
+{
+    static uint8_t key_id_counter;
+	if(glrun_t.power_key_id == 0x01 && glrun_t.key_long_flag !=1){
+           glrun_t.power_key_counter++;
+          if(glrun_t.power_key_counter > 40 ){
+               glrun_t.power_key_counter=0;
+			   glrun_t.key_long_flag =1;
+			    glrun_t.power_key_id++;
+			   buzzer_sound();
+			   gpro_t.gTimer_key_counter=0;
+			   if(gpro_t.gpower_flag == power_off){
+			     gpro_t.gpower_flag = power_on;
+				 //TM1639_Init();
+			   }
+			   else{
+			      gpro_t.gpower_flag = power_off;
+				  
+				  motor_pause();
+                  
+			   }
+    
+		 }
+		 else if(KEY_VALUE() ==KEY_UP && gpro_t.gpower_flag == power_on && glrun_t.key_long_flag !=1){
+               glrun_t.power_key_id++;
+			   glrun_t.power_key_counter=0;
+			   buzzer_sound();
+               key_id_counter = key_id_counter ^ 0x01;
+			   if(key_id_counter == 1){
+			   	 
+			     glrun_t.power_key_id = 1;
+
+				 motor_run_state();
+			   }
+			   else{
+
+			     glrun_t.power_key_id = 2;
+				 motor_pause();
+                  
+			   }
+
+
+		 }
+		 else if(gpro_t.gpower_flag == power_off &&  KEY_VALUE() ==KEY_UP && glrun_t.key_long_flag !=1){
+            glrun_t.power_key_counter=0;
+			glrun_t.power_key_id ++;
+			printf("key_counter =0 \r\n");
+	     }
+		 
+
+	  }
+	  
+    
+	  if(gpro_t.gTimer_key_counter > 1 && glrun_t.key_long_flag ==1){
+	     gpro_t.gTimer_key_counter =0;
+	      glrun_t.key_long_flag=0;
+	      glrun_t.power_key_id=0;
+          printf("key_long = 0\r\n");
+
+	  }
+	 
+
+
+}
