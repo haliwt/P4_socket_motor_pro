@@ -59,12 +59,12 @@ void smg_Init(void)
 	*@param:
 	*@retval:
 */
-void TM1639_DisplayTest(void)
-{
-   for (uint8_t i = 0; i < 10; i++) {
-        TM1639_WriteData(i, segTab[i]);
-    }
-}
+//void TM1639_DisplayTest(void)
+//{
+//   for (uint8_t i = 0; i < 10; i++) {
+//        TM1639_WriteData(i, segTab[i]);
+//    }
+//}
 /*
 	*@brief: smg main process from this run
 	*@note:

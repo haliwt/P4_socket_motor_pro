@@ -30,6 +30,17 @@ static TaskHandle_t xHandleTaskStart = NULL;
 #define HIGHEST_PRIORITY  2
 
 
+typedef struct{
+
+  uint8_t power_key_counter;
+  uint8_t key_long_flag;
+
+
+}freertos_run_t;
+
+freertos_run_t glrun_t;
+
+
 uint8_t power_on_sound_flag ;
 uint8_t key_value;
 /**********************************************************************************************************
@@ -86,8 +97,19 @@ static void vTaskStart(void *pvParameters)
     while(1)
     {
   
-        key_value = key_scan();
-		key_parse_value(key_value);
+       
+		if(KEY_VALUE() ==KEY_DOWN){
+
+			glrun_t.power_key_counter++;
+			if(glrun_t.power_key_counter > 65){
+
+			    glrun_t.power_key_counter =0;
+				glrun_t.key_long_flag = 1;
+
+			}
+			
+
+		}
 
         vTaskDelay(pdMS_TO_TICKS(20));
 	} 

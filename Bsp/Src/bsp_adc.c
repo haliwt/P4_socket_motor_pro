@@ -36,7 +36,7 @@ uint16_t  pinch_adc_detected_value(void)
   if(ADC_DMA_StartConversion()==0) return 0;
 
    if(ADC_DMA_StartConversion()){
-	   ADC_GetValues();
+	  // ADC_GetValues();
 	   adc_flag =1;	
    }
    if(adc_flag ==1){

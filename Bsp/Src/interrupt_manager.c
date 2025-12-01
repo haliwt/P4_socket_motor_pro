@@ -51,7 +51,7 @@ static void tim17_isr_callback_handler(void)
      
 	 if(tm0 > 999){//10ms *100 = 1000ms =1s
         tm0 =0;
-	
+	    gpro_t.gTimer_smg_counter++;
 	
 	
 		    

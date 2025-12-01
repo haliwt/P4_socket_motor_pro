@@ -26,7 +26,7 @@
 
 #include "bsp_delay.h"
 #include "bsp_smg.h"
-
+#include "bsp_led.h"
 
 #include "bsp_power.h"
 
@@ -40,6 +40,7 @@
 #include "bsp_adc.h"
 #include "bsp_hlw8032.h"
 #include "bsp_ina219.h"
+#include "bsp_i2c.h"
 
 #include "interrupt_manager.h"
 
