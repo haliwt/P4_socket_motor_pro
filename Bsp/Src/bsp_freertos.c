@@ -75,9 +75,9 @@ void freeRTOS_Handler(void)
  */
 static void vTaskMsgPro(void *pvParameters)
 {
-     BaseType_t xResult;
-	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(30); /* 设置最大等待时间为500ms */
-	uint32_t ulValue;
+//    BaseType_t xResult;
+//	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(30); /* 设置最大等待时间为500ms */
+//	uint32_t ulValue;
 	static uint8_t key_id_counter;
 	while(1)
     {
@@ -87,7 +87,7 @@ static void vTaskMsgPro(void *pvParameters)
 			
 
        }
-
+  #if 0
 	   xResult = xTaskNotifyWait(0x00000000,      
 						          0xFFFFFFFF,      
 						          &ulValue,        /* 保存ulNotifiedValue到变量ulValue中 */
@@ -133,17 +133,62 @@ static void vTaskMsgPro(void *pvParameters)
 			  //printf("接收到K3按键按下消息, ulNotifiedValue = 0x%08x\r\n", ulValue);
 			}
 	  }
-      else{
-      main_process_handler();
-	  if(gpro_t.gTimer_key_counter > 1 && glrun_t.key_long_flag ==1){
-	     gpro_t.gTimer_key_counter =0;
-	      glrun_t.key_long_flag=0;
+      #endif 
 
+	  if(glrun_t.power_key_id == 0x01 || (glrun_t.key_long_flag ==1 && glrun_t.key_long_flag !=2)){
+
+         if(glrun_t.key_long_flag ==1){
+               glrun_t.power_key_counter=0;
+			   glrun_t.key_long_flag ++;
+			    glrun_t.power_key_id++;
+			   if(gpro_t.gpower_flag == power_off){
+			     gpro_t.gpower_flag = power_on;
+				 TM1639_Init();
+			   }
+			   else{
+			      gpro_t.gpower_flag = power_off;
+				  
+				  motor_pause();
+                  
+			   }
+    
+		 }
+		 else if(glrun_t.power_key_id == 0x01 &&  KEY_VALUE() ==KEY_UP){
+                 glrun_t.power_key_id++;
+			  glrun_t.power_key_counter=0;
+			   buzzer_sound();
+               key_id_counter = key_id_counter ^ 0x01;
+			   if(key_id_counter == 1){
+			   	 
+			     glrun_t.power_key_id = 1;
+
+				 motor_run_state();
+			   }
+			   else{
+
+			     glrun_t.power_key_id = 2;
+				 motor_pause();
+                  
+			   }
+
+
+		 }
 
 	  }
+	  
+    
+	  if(gpro_t.gTimer_key_counter > 1 && glrun_t.key_long_flag ==2){
+	     gpro_t.gTimer_key_counter =0;
+	      glrun_t.key_long_flag=0;
+	      glrun_t.power_key_counter=0;
+          printf("key_long = 0\r\n");
+
+	  }
+	
+	  main_process_handler();
 	  vTaskDelay(pdMS_TO_TICKS(20));	
       }
- 	}
+ 	
 }	
 
 /**
@@ -166,22 +211,22 @@ static void vTaskStart(void *pvParameters)
 			    glrun_t.power_key_counter =0;
 				glrun_t.power_key_id = 1;
 			    glrun_t.key_long_flag = 1;
-
+               
 				gpro_t.gTimer_key_counter=0;
 			    buzzer_sound();
-				xTaskNotify(xHandleTaskMsgPro, /* 目标任务 */
-								BIT_0,         /* 设置目标任务事件标志位bit0  */
-								eSetBits);     /* 将目标任务的事件标志位与BIT_0进行或操作， 
-				                                      将结果赋值给事件标志位。*/
+//				xTaskNotify(xHandleTaskMsgPro, /* 目标任务 */
+//								BIT_0,         /* 设置目标任务事件标志位bit0  */
+//								eSetBits);     /* 将目标任务的事件标志位与BIT_0进行或操作， 
+//				                                      将结果赋值给事件标志位。*/
 
 		    }
-            if(glrun_t.power_key_counter < 34 &&  gpro_t.gpower_flag  == power_on && glrun_t.key_long_flag != 1){
+            if(glrun_t.power_key_counter < 34 &&  gpro_t.gpower_flag  == power_on && glrun_t.key_long_flag == 0){
 
-			   xTaskNotify(xHandleTaskMsgPro, /* 目标任务 */
-								BIT_1,        /* 设置目标任务事件标志位bit0  */
-								eSetBits);    /* 将目标任务的事件标志位与BIT_0进行或操作， 
-				                                      将结果赋值给事件标志位。*/
-                
+//			   xTaskNotify(xHandleTaskMsgPro, /* 目标任务 */
+//								BIT_1,        /* 设置目标任务事件标志位bit0  */
+//								eSetBits);    /* 将目标任务的事件标志位与BIT_0进行或操作， 
+//				                                      将结果赋值给事件标志位。*/
+               glrun_t.power_key_id = 0x01;
 
 			}
 			

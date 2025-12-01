@@ -163,7 +163,7 @@ uint8_t read_total_kw_decade_value(void)
 uint8_t read_total_kw_uint_value(void)
 {
   
-   if(hlw_data.power < 0) return (uint8_t)hlw_data.power;
+   if(hlw_data.power == 0) return (uint8_t)hlw_data.power;
    
 }
 

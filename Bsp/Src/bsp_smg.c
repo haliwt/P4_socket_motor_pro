@@ -77,6 +77,7 @@ void works_disp_hanlder(void)
      switch(glsmg_t.smg_run_step){
 
 	 case smg_init:
+	 LED_KEY_ON();	
      TM1639_Init();
 	 glsmg_t.smg_run_step= smg_voltage;
 
@@ -85,22 +86,23 @@ void works_disp_hanlder(void)
 	 case smg_voltage:
       glsmg_t.read_ac_voltage= read_ac_voltage_value();
 	  disp_voltage_3bit_value(glsmg_t.read_ac_voltage);
+	  motor_detect_pinch();    
 	  glsmg_t.smg_run_step = smg_kw;
-      motor_detect_pinch();    
+    
 	 break;
 
-	 case smg_kw:
-		glsmg_t.read_kw_value = read_total_kw_decade_value();
-		if(glsmg_t.read_kw_value > 0){
+	 case smg_kw://2
+//		glsmg_t.read_kw_value = read_total_kw_decade_value();
+//		if(glsmg_t.read_kw_value > 0){
 
-             disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,1);
-		}
-		else{
+//             disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,1);
+//		}
+//		else{
 
-		   glsmg_t.read_kw_value = read_total_kw_uint_value();
-		    disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,0);
+//		   glsmg_t.read_kw_value = read_total_kw_uint_value();
+//		    disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,0);
 
-		}
+//		}
         motor_detect_pinch();
 		glsmg_t.smg_run_step = smg_usb;
 	 break;
@@ -203,7 +205,7 @@ void smg_power_off_ref(void)
 {
 
 	glsmg_t.smg_run_step= smg_init;
-
+    LED_KEY_OFF();
 
 }
 
