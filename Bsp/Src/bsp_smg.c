@@ -1,7 +1,7 @@
 #include "bsp.h"
 
 const uint8_t segTab[10] = {
-	  0x3F, // 0
+	  0x3F, // 0, -> 0b0011 1111
 	  0x06, // 1
 	  0x5B, // 2
 	  0x4F, // 3
@@ -104,7 +104,7 @@ void works_disp_hanlder(void)
 //		    disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,0);
 
 //		}
-        disp_capacity_2bit_kwvalue(0,1);
+        disp_capacity_2bit_kwvalue(0,0);
         motor_detect_pinch();
 	    display_usb_kw_symbol();
 		glsmg_t.smg_run_step = smg_usb;
@@ -141,7 +141,7 @@ static void disp_voltage_3bit_value(uint16_t voltage)
   
   TM1639_Write_Digit_Full(TM1639_ADDR_GRID1_H, TM1639_ADDR_GRID1_L, segTab[vol_hundred]);
   TM1639_Write_Digit_Full(TM1639_ADDR_GRID2_H, TM1639_ADDR_GRID2_L, segTab[vol_decade]);
-  TM1639_Write_Digit_Full(TM1639_ADDR_GRID3_H, TM1639_ADDR_GRID3_L, segTab[vol_unit]);
+  TM1639_Write_Digit_Full(TM1639_ADDR_GRID3_H, TM1639_ADDR_GRID3_L, segTab[vol_unit] + seg_h);
 
   
 }
@@ -156,19 +156,17 @@ static void disp_capacity_2bit_kwvalue(uint8_t kwvalue,uint8_t decimal)
 	
 	 uint8_t kw_decade,kw_unit;
 
-	 if(decimal > 0){ //integer 
-	
-	
 	 kw_decade =  (kwvalue  /10) %10;
 	 kw_unit =  kwvalue  %10;
-	 
-	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID6_H, TM1639_ADDR_GRID7_L, segTab[kw_decade]);
-	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID7_H, TM1639_ADDR_GRID7_L, segTab[kw_unit]);
+
+	 if(decimal > 0){ //integer 
+	    TM1639_Write_Digit_Full(TM1639_ADDR_GRID6_H, TM1639_ADDR_GRID6_L, segTab[kw_decade]);
+	    TM1639_Write_Digit_Full(TM1639_ADDR_GRID7_H, TM1639_ADDR_GRID7_L, segTab[kw_unit]);
 	 
 	 }
 	 else{ //decimal 
        
-        TM1639_Write_Digit_Full(TM1639_ADDR_GRID6_H, TM1639_ADDR_GRID7_L, segTab[0]+0x80);
+        TM1639_Write_Digit_Full(TM1639_ADDR_GRID6_H, TM1639_ADDR_GRID6_L, segTab[0]+seg_h);
 	    TM1639_Write_Digit_Full(TM1639_ADDR_GRID7_H, TM1639_ADDR_GRID7_L, segTab[kw_unit]);
 
 
@@ -190,7 +188,7 @@ static void disp_usb_capacity_2bit_value(uint8_t usb_value)
 	 usb_unit =  usb_value %10;
 	 
 	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID4_H, TM1639_ADDR_GRID4_L, segTab[usb_decade]);
-	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID5_H, TM1639_ADDR_GRID5_L, segTab[usb_unit]);
+	 TM1639_Write_Digit_Full(TM1639_ADDR_GRID5_H, TM1639_ADDR_GRID5_L, segTab[usb_unit] + seg_h);
 	 
 	
 }
