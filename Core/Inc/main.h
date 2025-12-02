@@ -74,10 +74,7 @@ void Error_Handler(void);
 #define LED_KEY_GPIO_Port GPIOC
 #define RELAY_CTL_Pin LL_GPIO_PIN_1
 #define RELAY_CTL_GPIO_Port GPIOA
-#define I2C_EP_SCL_Pin LL_GPIO_PIN_4
-#define I2C_EP_SCL_GPIO_Port GPIOA
-#define I2C_EP_SDA_Pin LL_GPIO_PIN_5
-#define I2C_EP_SDA_GPIO_Port GPIOA
+
 #define PINCH_Pin LL_GPIO_PIN_6
 #define PINCH_GPIO_Port GPIOA
 #define MOTOR_POS_UP_Pin LL_GPIO_PIN_7
@@ -102,10 +99,18 @@ void Error_Handler(void);
 #define USB_EN_GPIO_Port GPIOA
 #define USB_OVERLOAD_Pin LL_GPIO_PIN_0
 #define USB_OVERLOAD_GPIO_Port GPIOD
+//INA219 IC I2C 
 #define I2C_INA_SDA_Pin LL_GPIO_PIN_7
 #define I2C_INA_SDA_GPIO_Port GPIOB
 #define I2C_INA_SCL_Pin LL_GPIO_PIN_8
 #define I2C_INA_SCL_GPIO_Port GPIOB
+//EEPRO IC I2C 
+#define I2C_EP_SCL_Pin LL_GPIO_PIN_4
+#define I2C_EP_SCL_GPIO_Port GPIOA
+#define I2C_EP_SDA_Pin LL_GPIO_PIN_5
+#define I2C_EP_SDA_GPIO_Port GPIOA
+
+//
 #define KEY_Pin LL_GPIO_PIN_9
 #define KEY_GPIO_Port GPIOB
 

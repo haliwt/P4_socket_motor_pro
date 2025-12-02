@@ -84,10 +84,10 @@ void MX_GPIO_Init(void)
   LL_GPIO_ResetOutputPin(USB_EN_GPIO_Port, USB_EN_Pin);
 
   /**/
-  LL_GPIO_ResetOutputPin(I2C_INA_SDA_GPIO_Port, I2C_INA_SDA_Pin);
+ // LL_GPIO_ResetOutputPin(I2C_INA_SDA_GPIO_Port, I2C_INA_SDA_Pin);
 
   /**/
-  LL_GPIO_ResetOutputPin(I2C_INA_SCL_GPIO_Port, I2C_INA_SCL_Pin);
+  //LL_GPIO_ResetOutputPin(I2C_INA_SCL_GPIO_Port, I2C_INA_SCL_Pin);
 
   /**/
   GPIO_InitStruct.Pin = LED_KEY_Pin;
@@ -208,6 +208,7 @@ void MX_GPIO_Init(void)
   LL_GPIO_Init(USB_OVERLOAD_GPIO_Port, &GPIO_InitStruct);
 
   /**/
+  #if 0
   GPIO_InitStruct.Pin = I2C_INA_SDA_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -222,7 +223,7 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(I2C_INA_SCL_GPIO_Port, &GPIO_InitStruct);
-
+  #endif 
   /**/
   GPIO_InitStruct.Pin = KEY_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;

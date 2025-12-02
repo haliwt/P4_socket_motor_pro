@@ -18,7 +18,7 @@ typedef struct SMG_PROCESS{
 
     uint8_t smg_run_step;
 	uint8_t read_kw_value;
-	uint8_t read_usb_w_value;
+	float read_usb_w_value;
     uint16_t read_ac_voltage;
 
 }SMG_PROCESS_T;
@@ -112,8 +112,11 @@ void works_disp_hanlder(void)
 
 	 case smg_usb:
 
-	      glsmg_t.read_usb_w_value = read_usb_capacity_value(); 
-		  disp_usb_capacity_2bit_value(glsmg_t.read_usb_w_value);
+	      glsmg_t.read_usb_w_value = INA219_GetPower() ;
+		  #if DEBUG_FLAG
+            printf("usb_w = %f \r\n",glsmg_t.read_usb_w_value);
+		  #endif 
+		  disp_usb_capacity_2bit_value((uint8_t)glsmg_t.read_usb_w_value);
           motor_detect_pinch();
 		  display_usb_kw_symbol();
 		  glsmg_t.smg_run_step = smg_voltage;
