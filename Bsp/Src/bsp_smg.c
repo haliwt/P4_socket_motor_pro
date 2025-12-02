@@ -41,18 +41,7 @@ static void disp_capacity_2bit_kwvalue(uint8_t kwvalue,uint8_t decimal);
 	*@retval:
 */
 
-void smg_Init(void)
-{
-    if(gpro_t.gpower_flag == power_on){
 
-           
-	}
-	else{
-
-
-	}
-
-}
 /*
 	*@brief:// --- 示例：显示数字 ---
 	*@note:
@@ -74,11 +63,21 @@ void smg_Init(void)
 void works_disp_hanlder(void)
 {
 
+   uint8_t ina219;
      switch(glsmg_t.smg_run_step){
 
 	 case smg_init:
 	 LED_KEY_ON();	
      TM1639_Init();
+	 ina219= INA219_Init() ;
+
+	  #if DEBUG_FLAG
+      if(ina219==1)
+      printf("ina219_pass = %d \r\n",ina219);
+	  else 
+	  	 printf("ina219_ng !!!!!= %d \r\n",ina219);
+
+   #endif 
 	 glsmg_t.smg_run_step= smg_voltage;
 
 	 break;
@@ -116,7 +115,7 @@ void works_disp_hanlder(void)
 		  #if DEBUG_FLAG
             printf("usb_w = %f \r\n",glsmg_t.read_usb_w_value);
 		  #endif 
-		  disp_usb_capacity_2bit_value((uint8_t)glsmg_t.read_usb_w_value);
+		 // disp_usb_capacity_2bit_value((uint8_t)glsmg_t.read_usb_w_value);
           motor_detect_pinch();
 		  display_usb_kw_symbol();
 		  glsmg_t.smg_run_step = smg_voltage;
