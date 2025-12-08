@@ -76,6 +76,7 @@ void main_process_handler(void)
 	motor_pause();
 	TM1639_donotDisplay();
 	LED_KEY_OFF() ;
+	USB_POWER_DISABLE();
    
   
 

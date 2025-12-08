@@ -82,6 +82,13 @@ float INA219_GetPower(void) ;
 
 float INA219_ReadPower_mW(void);
 
+float INA219_GetCurrent(void) ;
+
+float INA219_GetBusVoltage(void);
+
+float INA219_GetShuntVoltage(void) ;
+;
+
 
 #endif 
 

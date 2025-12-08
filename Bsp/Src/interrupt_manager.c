@@ -54,6 +54,8 @@ static void tim17_isr_callback_handler(void)
 	    gpro_t.gTimer_smg_counter++;
 	
 	    gpro_t.gTimer_key_counter++;
+		gpro_t.gTimer_read_usbw++;
+		gpro_t.gTimer_read_total_w++;
 		    
 
         

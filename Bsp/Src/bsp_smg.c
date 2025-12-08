@@ -63,7 +63,8 @@ static void disp_capacity_2bit_kwvalue(uint8_t kwvalue,uint8_t decimal);
 void works_disp_hanlder(void)
 {
 
-   uint8_t ina219;
+     uint8_t ina219;
+	 float voltage_value,current_value,shunt_voltage_value;
      switch(glsmg_t.smg_run_step){
 
 	 case smg_init:
@@ -73,11 +74,12 @@ void works_disp_hanlder(void)
 
 	  #if DEBUG_FLAG
       if(ina219==1)
-      printf("ina219_pass = %d \r\n",ina219);
+         printf("ina219_pass = %d \r\n",ina219);
 	  else 
 	  	 printf("ina219_ng !!!!!= %d \r\n",ina219);
 
    #endif 
+     USB_POWER_ENABLE();
 	 glsmg_t.smg_run_step= smg_voltage;
 
 	 break;
@@ -103,6 +105,22 @@ void works_disp_hanlder(void)
 //		    disp_capacity_2bit_kwvalue(glsmg_t.read_kw_value,0);
 
 //		}
+        if( gpro_t.gTimer_read_total_w > 3){
+         gpro_t.gTimer_read_total_w =0 ;
+
+		 current_value = INA219_GetCurrent() ;
+         
+		 voltage_value =  INA219_GetBusVoltage();
+
+		 shunt_voltage_value = INA219_GetShuntVoltage();
+
+		  #if DEBUG_FLAG
+            printf("current_value = %0.5f \r\n",current_value);
+		     printf("voltage_value = %0.3f \r\n",voltage_value);
+			  printf("shunt_voltage_value = %0.3f \r\n",shunt_voltage_value);
+		  #endif 
+		 	
+        }
         disp_capacity_2bit_kwvalue(0,0);
         motor_detect_pinch();
 	    display_usb_kw_symbol();
@@ -111,11 +129,14 @@ void works_disp_hanlder(void)
 
 	 case smg_usb:
 
+	      if(gpro_t.gTimer_read_usbw >4){
+		  	 gpro_t.gTimer_read_usbw=0;
 	      glsmg_t.read_usb_w_value = INA219_GetPower() ;
 		  #if DEBUG_FLAG
-            printf("usb_w = %f \r\n",glsmg_t.read_usb_w_value);
+            printf("usb_w = %0.4f \r\n",glsmg_t.read_usb_w_value);
 		  #endif 
 		 // disp_usb_capacity_2bit_value((uint8_t)glsmg_t.read_usb_w_value);
+	      }
           motor_detect_pinch();
 		  display_usb_kw_symbol();
 		  glsmg_t.smg_run_step = smg_voltage;

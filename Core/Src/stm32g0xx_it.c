@@ -140,15 +140,50 @@ void DMA1_Channel2_3_IRQHandler(void)
 void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
-   if(LL_DMA_IsActiveFlag_TC4(DMA1)){
-     	LL_DMA_ClearFlag_TC4(DMA1);
+
+   static uint32_t processed_bytes = 0;
+   uint32_t new_data_start, new_data_end;
+   
+   if(LL_DMA_IsActiveFlag_HT4(DMA1)){
+     	LL_DMA_ClearFlag_HT4(DMA1);
 		hlw8032_rx_done=1;// 一帧接收完成
+
+		 /* 新数据范围：从上次处理位置到缓冲区中点 */
+        new_data_start = processed_bytes;
+        new_data_end = HLW0803_BUFFER_SIZE / 2;
+        
+        /* 处理新数据 */
+        Process_New_DMA_Data(new_data_start, new_data_end);
+        
+        /* 更新处理位置 */
+        processed_bytes = 0;
+        
+       
    	}
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
-  if(LL_DMA_IsActiveFlag_TE4(DMA1)) LL_DMA_ClearFlag_TE4(DMA1);
-  
 
+       /* 检查传输完成中断 */
+    if(LL_DMA_IsActiveFlag_TC4(DMA1))
+    {
+        LL_DMA_ClearFlag_TC4(DMA1);
+        
+      /* 新数据范围：从上次处理位置到缓冲区末尾 */
+        new_data_start = processed_bytes;
+        new_data_end = HLW0803_BUFFER_SIZE;
+        
+        /* 处理新数据 */
+        Process_New_DMA_Data(new_data_start, new_data_end);
+        
+        /* 更新处理位置 */
+        processed_bytes = HLW0803_BUFFER_SIZE / 2;
+    }
+
+	if(LL_DMA_IsActiveFlag_TE4(DMA1)){
+  	  LL_DMA_ClearFlag_TE4(DMA1);
+    }
+
+  	
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
 }
 

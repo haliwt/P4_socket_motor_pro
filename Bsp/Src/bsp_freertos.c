@@ -237,7 +237,13 @@ void freertos_set_prority(void)
 //	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
 //}
-
+/**
+ *@brief 
+ *@note
+ *@param
+ *@retval 
+ *
+**/
 static void parse_key_handler(void)
 {
     static uint8_t key_id_counter;
@@ -255,7 +261,7 @@ static void parse_key_handler(void)
 			   }
 			   else{
 			      gpro_t.gpower_flag = power_off;
-				  
+				  USB_POWER_DISABLE();
 				  motor_pause();
                   
 			   }

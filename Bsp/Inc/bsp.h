@@ -32,6 +32,8 @@
 
 #include "bsp_key.h"
 #include "bsp_motor.h"
+#include "bsp_machine.h"
+#include "bsp_hlw8032_app.h"
 
 #include "bsp_power_meter.h"
 #include "bsp_usb_meter.h"
@@ -93,6 +95,8 @@ typedef struct PROCESS_T{
   
   uint8_t gTimer_smg_counter;
   uint8_t gTimer_key_counter;
+  uint8_t gTimer_read_usbw;
+  uint8_t gTimer_read_total_w;
 }process_t;
 
 extern process_t gpro_t;

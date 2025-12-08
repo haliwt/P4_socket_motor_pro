@@ -21,7 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "bsp.h"
 /* USER CODE END 0 */
 
 /* USART1 init function */
@@ -30,7 +30,7 @@ void MX_USART1_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART1_Init 0 */
-   //HLW8032 IC TX
+   //HLW8032 IC TX BOUARD RATE = 4800 bps
   /* USER CODE END USART1_Init 0 */
 
   LL_USART_InitTypeDef USART_InitStruct = {0};
@@ -72,7 +72,7 @@ void MX_USART1_UART_Init(void)
 
   LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PRIORITY_LOW);
 
-  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MODE_NORMAL);
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MODE_CIRCULAR);//WT.EDIT //LL_DMA_MODE_NORMAL);//
 
   LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PERIPH_NOINCREMENT);
 
@@ -107,7 +107,7 @@ void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   USART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
-  USART_InitStruct.BaudRate = 115200;
+  USART_InitStruct.BaudRate = 4800; //HLW8032
   USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
   USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
   USART_InitStruct.Parity = LL_USART_PARITY_NONE;
@@ -130,13 +130,30 @@ void MX_USART1_UART_Init(void)
   while((!(LL_USART_IsActiveFlag_TEACK(USART1))) || (!(LL_USART_IsActiveFlag_REACK(USART1))))
   {
   }
-  /* USER CODE BEGIN USART1_Init 2 */
 
+
+
+  /* USER CODE BEGIN USART1_Init 2 */
+	  // 配置外设和内存地址
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
+        LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_RECEIVE), // 外设地址
+        (uint32_t)hlw8032_rxbuf,                                         // 内存地址
+        LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    
+    // 设置数据长度（双缓冲总长度）
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, HLW8032_DMA_RX_BUFFER_SIZE);
+    
+    // 使能DMA中断：半传输完成和传输完成
+    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_4);
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_4);
+    
+    // 5. 使能USART1的DMA接收
+    LL_USART_EnableDMAReq_RX(USART1);
   /* USER CODE END USART1_Init 2 */
 
 }
 /* USART2 init function */
-
+// voice shound USART2 Baud rate 9600
 void MX_USART2_UART_Init(void)
 {
 
@@ -216,7 +233,7 @@ void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   USART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
-  USART_InitStruct.BaudRate = 115200;
+  USART_InitStruct.BaudRate = 9600;
   USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
   USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
   USART_InitStruct.Parity = LL_USART_PARITY_NONE;

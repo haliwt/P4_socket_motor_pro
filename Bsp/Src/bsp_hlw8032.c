@@ -1,7 +1,7 @@
 #include "bsp.h"
 
-#define HLW8032_FRAME_LEN 24
-uint8_t hlw8032_rxbuf[HLW8032_FRAME_LEN];
+uint8_t hlw8032_rxbuf[HLW8032_FRAME_SIZE]={0};
+
 volatile uint8_t hlw8032_rx_done = 0;
 
 typedef struct {
