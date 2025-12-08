@@ -13,9 +13,9 @@
 
 extern uint8_t hlw8032_rxbuf[HLW8032_FRAME_SIZE];
 
-extern volatile uint8_t  hlw8032_rx_done;
+extern volatile uint8_t  hlw8032_rx_half_flag;
 
-void USART1_DMA_RX_Init(void);
+//void USART1_DMA_RX_Init(void);
 
 uint16_t read_ac_voltage_value(void);
 

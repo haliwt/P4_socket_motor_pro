@@ -1,11 +1,77 @@
 
 #include "bsp.h"
 
+//====================================================
+// 数据结构体
+// 在 HLW8032_Data_t 结构体中添加新字段
+typedef struct {
 
-HLW0803_Measure_t measure_t;
+    uint8_t status_reg;             // fram[0] 状态寄存器
+    uint8_t check_reg;              // fram[1] 检测寄存器
+    uint8_t voltage_param_rg[3];   // fram[3-5] 电压参数寄存器
+    uint8_t voltage_reg[3];         // fram[6-8] 电压寄存器
+    uint8_t current_param_reg[3];   // fram[9-11] 电流参数寄存器
+    uint8_t current_reg[3];         // fram[12-14] 电流寄存器
+    uint8_t power_param_reg[3];     // fram[15-17] 功率参数寄存器
+    uint8_t power_reg[3];           // fram[18-20] 功率寄存器
+    uint8_t data_update_reg;        // fram[21] 数据更新寄存器
+    uint8_t pf[2];              // fram[22-23] PF寄存器
+    uint8_t checksum;           // fram[24] 校验和
+} HLW0803_DataFrame_t;
+
+
+
+/* 解析后的工程值 */
+typedef struct {
+    uint32_t voltage_param_ref;      // 电压 (V)
+    uint32_t voltage_ref;
+    uint32_t  current_param_ref;      // 电流 (A)
+    uint32_t current_ref;
+    uint32_t  power_param_ref;        // 功率 (W)
+    uint8_t  power_ref;
+	float    voltage_v;
+	float    current_a;
+	float    power_w;
+    float energy;       // 电能 (kWh)
+               // 功率因数
+    uint8_t status_ref;     // 状态
+    uint8_t data_valid;    // 数据有效标志
+    volatile uint8_t dma_tx_half_flag;
+	float voltage_factor;
+	float current_factor;
+	float power_factor;
+	
+} HLW0803_Measure_t;
+
+
 HLW0803_DataFrame_t hlw8032_frame_t;
+HLW0803_Measure_t   hlw8032_measure_t;
 
 
+static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out ,HLW0803_Measure_t *mease_out);
+/**
+  * @brief  开始校正电压,电流,功率系数
+  * @param  使用100W,电压 220V ,电流 I= 0.455A,W=100W.
+  * @param  
+  * @retval
+  */
+void caliration_hlw8032_factor(void)
+{
+     
+    hlw8032_measure_t.voltage_factor = (hlw8032_measure_t.voltage_param_ref/hlw8032_measure_t.voltage_ref)/220 ;//
+    #if DEBUG_FLAG
+     printf("votlage_k1 = %0.2f \n",hlw8032_measure_t.voltage_factor);
+	#endif 
+	hlw8032_measure_t.voltage_factor = (hlw8032_measure_t.current_param_ref/hlw8032_measure_t.current_ref)/0.455 ;//I= 0.455A
+    #if DEBUG_FLAG
+		printf("current_k2 = %0.2f \n",hlw8032_measure_t.current_factor);
+   #endif 
+
+	hlw8032_measure_t.power_factor = (hlw8032_measure_t.power_param_ref/hlw8032_measure_t.power_ref)/100;//100W
+     #if DEBUG_FLAG
+     printf("power_k3 = %0.2f \n",hlw8032_measure_t.power_factor);
+	#endif 
+}
 
 /**
   * @brief  查找有效数据帧的起始位置
@@ -16,17 +82,38 @@ HLW0803_DataFrame_t hlw8032_frame_t;
 static int find_frame_start(const uint8_t* buffer, int size)
 {
     // HLW8032帧头：stateREG =0x55 ---芯片误差修正正常, checkREG:0x5A --default is data
-    for (int i = 0; i < size - HLW8032_FRAME_SIZE + 1; i++)
-    {
-        if (buffer[i] == 0x55 && buffer[i + 1] == 0x5A)
-        {
-            // 确保有足够的数据构成完整帧
-            if (i + HLW8032_FRAME_SIZE <= size)
-            {
-                return i;
-            }
-        }
+    if(size < 24){
+	    for (int i = 0; i < size; i++)//for (int i = 0; i < size - HLW8032_FRAME_SIZE + 1; i++)
+	    {
+	        if (buffer[i] == 0x55 && buffer[i + 1] == 0x5A)
+	        {
+//	            // 确保有足够的数据构成完整帧
+//	            if (i + HLW8032_FRAME_SIZE <= size + 1)
+//	            {
+//	                return i;
+//	            }
+                return 1;
+				
+	        }
+	    }
     }
+	else if(size > 23){
+
+	for (int i = 0; i < size; i++)//for (int i = 0; i < size - HLW8032_FRAME_SIZE + 1; i++)
+	{
+			   if (buffer[size+i] == 0x55 && buffer[i +size+1] == 0x5A)
+			   {
+				   // 确保有足够的数据构成完整帧
+//				   if (i + HLW8032_FRAME_SIZE <= size)
+//				   {
+//					   return i;
+//				   }
+                   return 1;
+			   }
+		   }
+
+	}
+	
     return -1;
 }
 
@@ -53,13 +140,15 @@ static inline uint8_t hlw8032_calc_checksum(const uint8_t *frame)
   * @param  data: 数据存储结构体
   * @retval true: 解析成功, false: 解析失败
   */
-static uint8_t parse_hlw8032_frame(const uint8_t* frame, HLW8032_Data_t* data,HLW0803_Measure_t *mdata)
+static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out,HLW0803_Measure_t  *measure_out)
 {
-     // 1. 检查帧头
+
+   uint8_t error_count;
+  // 1. 检查帧头
     if (frame[0] != 0x55 || frame[1] != 0x5A) {
 		hlw8032_rxbuf[0]=0;
 		hlw8032_rxbuf[1]=0;
-        return false;
+        return 0;
     }
     
     // 2. 校验和验证
@@ -68,58 +157,59 @@ static uint8_t parse_hlw8032_frame(const uint8_t* frame, HLW8032_Data_t* data,HL
         checksum += frame[i];
     }
     if (checksum != frame[23]) {
-        data->error_count++;
-        return false;
+        error_count++;
+        return 0;
     }
     
     // 3. 解析状态寄存器（字节2）
-    mdata->status_ref = frame[2];
+    hlw8032_measure_t.status_ref = frame[2];
     
     // 4. 解析所有寄存器（小端格式）
     // 4.1 电压参数寄存器 (字节3-5)
-    mdata->voltage_param_ref = ((uint32_t)frame[5] << 16) |((uint32_t)frame[4] << 8)  |(uint32_t)frame[3];
+    hlw8032_measure_t.voltage_param_ref = ((uint32_t)frame[5] << 16) |((uint32_t)frame[4] << 8)  |(uint32_t)frame[3];
     
     // 4.2 电压寄存器 (字节6-8)
-    mdata->voltage_ref = ((uint32_t)frame[8] << 16) |((uint32_t)frame[7] << 8)  |(uint32_t)frame[6];
+    hlw8032_measure_t.voltage_ref = ((uint32_t)frame[8] << 16) |((uint32_t)frame[7] << 8)  |(uint32_t)frame[6];
     
     // 4.3 电流参数寄存器 (字节9-11)
-    mdata->current_param_ref = ((uint32_t)frame[11] << 16) |((uint32_t)frame[10] << 8) |(uint32_t)frame[9];
+    hlw8032_measure_t.current_param_ref = ((uint32_t)frame[11] << 16) |((uint32_t)frame[10] << 8) |(uint32_t)frame[9];
     
     // 4.4 电流寄存器 (字节12-14)
-    mdata->current_ref = ((uint32_t)frame[14] << 16) |((uint32_t)frame[13] << 8)  |(uint32_t)frame[12];
+   hlw8032_measure_t.current_ref = ((uint32_t)frame[14] << 16) |((uint32_t)frame[13] << 8)  |(uint32_t)frame[12];
     
     // 4.5 功率参数寄存器 (字节15-17)
-    mdata->power_param_ref = ((uint32_t)frame[17] << 16) |((uint32_t)frame[16] << 8)  |(uint32_t)frame[15];
+   hlw8032_measure_t.power_param_ref = ((uint32_t)frame[17] << 16) |((uint32_t)frame[16] << 8)  |(uint32_t)frame[15];
 
         
     // 4.5 功率寄存器 (字节18-20)
-    mdata->power_ref = ((uint32_t)frame[20] << 16) |((uint32_t)frame[19] << 8)  |(uint32_t)frame[18];
+    hlw8032_measure_t.power_ref = ((uint32_t)frame[20] << 16) |((uint32_t)frame[19] << 8)  |(uint32_t)frame[18];
     
 	
     
     // 5. 使用校准系数计算物理值
     // 注意：应该使用“参数寄存器”计算高精度的电压电流值
-    if(mdata->voltage_ref !=0){
-       mdata->voltage_v = [(float)mdata->voltage_param_ref/(float)mdata->voltage_ref] * HLW8032_VOLTAGE_COEFF;
+    if(hlw8032_measure_t.voltage_ref !=0){
+       hlw8032_measure_t.voltage_v = ((float)hlw8032_measure_t.voltage_param_ref/(float)hlw8032_measure_t.voltage_ref )* HLW8032_VOLTAGE_COEFF;
     }
 	else{
-       mdata->voltage_v = 0;
+       hlw8032_measure_t.voltage_v = 0;
 	   
 	}
 
-	if(mdata->current_ref !=0){
-    	mdata->current_a = [(float)mdata->current_param_ref /(float)mdata->current_ref]* HLW8032_CURRENT_COEFF;
+	if(hlw8032_measure_t.current_ref !=0){
+    	hlw8032_measure_t.current_a = ((float)hlw8032_measure_t.current_param_ref /(float)hlw8032_measure_t.current_ref)* HLW8032_CURRENT_COEFF;
 	}
 	else{
-        mdata->current_a = 0;
+        hlw8032_measure_t.current_a = 0;
 
 	}
 
-    if(mdata->power_ref !=0){
-	  mdata->power_w   = [(float)mdata->power_param_ref /(float)mdata->power_ref]* HLW8032_POWER_COEFF;
+    if(hlw8032_measure_t.power_ref !=0){
+	  hlw8032_measure_t.power_w   = ((float)hlw8032_measure_t.power_param_ref /(float)hlw8032_measure_t.power_ref)* HLW8032_POWER_COEFF;
+	  
     }
 	else{
-      mdata->power_w = 0 ;
+      hlw8032_measure_t.power_w = 0 ;
 	}
 	#if 0
     // 6. 计算功率因数
@@ -150,69 +240,75 @@ static uint8_t parse_hlw8032_frame(const uint8_t* frame, HLW8032_Data_t* data,HL
     
     data->data_valid = true;
 	#endif 
-    return true;
+    return 1;
 }
-#if 1
-/**
-  * @brief  返回一个DMA USART TX HALF FLAG
-  * @param  data: 数据存储结构体指针
-  * @retval true: 有新数据, false: 无新数据
-  */
 
-uint8_t HLW8032_Read_DMARxHalf_Flag(void)
-{
-
-
-
-}
 
 /**
   * @brief  处理接收到的数据
   * @param  data: 数据存储结构体指针
   * @retval true: 有新数据, false: 无新数据
   */
-uint8_t HLW8032_ProcessData(HLW8032_Data_t* data)
+uint8_t HLW8032_ProcessData(void)
 {
-    if (!frame_ready || data == NULL)
-        return false;
-    
-    bool new_data = false;
+
+     int8_t frame_start;
+
+
+    uint8_t new_data = 0;
     uint8_t* current_buffer;
     int buffer_size;
     
     // 确定当前活动缓冲区
-    if (active_buffer == 0)
+    if (hlw8032_rx_half_flag  == 0) //dma rx data half finish
     {
-        current_buffer = &hlw8032_rxbuf[0];//1.STATE REG 
-        buffer_size = HLW8032_DMA_RX_BUFFER_SIZE / 2;
+           current_buffer = &hlw8032_rxbuf[0];//1.STATE REG 
+	       buffer_size = HLW8032_DMA_RX_BUFFER_SIZE / 2;
+	      // 查找有效帧
+	    frame_start = find_frame_start(hlw8032_rxbuf, buffer_size);
+	    if (frame_start >= 0)
+	    {
+	        // 解析数据帧
+	        if(parse_hlw8032_frame(hlw8032_rxbuf,&hlw8032_frame_t,&hlw8032_measure_t))
+	        {
+	            new_data = 1;
+	        }
+	    }
     }
-    else
+	else if(hlw8032_rx_half_flag  == 1)//dma receive data complete finish
     {
-        current_buffer = &hlw8032_rxbuf[HLW8032_DMA_RX_BUFFER_SIZE / 2];
-        buffer_size = HLW8032_DMA_RX_BUFFER_SIZE / 2;
-    }
-    
-    // 查找有效帧
-    int frame_start = find_frame_start(current_buffer, buffer_size);
-    if (frame_start >= 0)
-    {
-        // 解析数据帧
-        if (parse_hlw8032_frame(&current_buffer[frame_start], data))
-        {
-            new_data = true;
-        }
+       
+		current_buffer = &hlw8032_rxbuf[24];//1.STATE REG original is the "24"
+	    buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
+		frame_start = find_frame_start(hlw8032_rxbuf, buffer_size);
+	    if (frame_start >= 0)
+	    {
+	        // 解析数据帧
+	        if (parse_hlw8032_frame(hlw8032_rxbuf, &hlw8032_frame_t,&hlw8032_measure_t))
+	        {
+	            new_data = 1;
+	        }
+	    }
+       
     }
     else
     {
         // 未找到有效帧头，可尝试重新同步
-        data->frame_sync = false;
-        data->error_count++;
+       // data->frame_sync = false;
+       // data->error_count++;
     }
     
-    frame_ready = false;
+    
     return new_data;
 }
-#endif 
+
+/**
+  * @brief  返回一个DMA USART TX HALF FLAG
+  * @param  data: 数据存储结构体指针
+  * @retval true: 有新数据, false: 无新数据
+  */
+
+ 
 #if 0
 /**
   * @brief  重置数据接收
@@ -238,14 +334,20 @@ void HLW8032_ResetReception(void)
     memset(&hlw8032_data, 0, sizeof(HLW8032_Data_t));
 }
 #endif 
+
 /**
-  * @brief  获取最新数据
-  * @retval 数据指针
+  * @brief  printf output voltage ,current ,powe value 
+  * @param  data: 数据存储结构体指针
+  * @retval true: 有新数据, false: 无新数据
   */
-//HLW8032_Data_t* HLW8032_GetLatestData(void)
-//{
-//    return &hlw8032_data;
-//}
+void hlw8032_output_vlaue(void)
+{ 
+   #if DEBUG_FLAG
+   printf("voltage = %0.2f\n",hlw8032_measure_t.voltage_v);
+   printf("current = %0.2f\n",hlw8032_measure_t.current_a);
+	printf("power_w = %0.2f\n",hlw8032_measure_t.power_w);
+  #endif 
+}
 
 
 #if 0
@@ -360,6 +462,7 @@ static void Process_DMA_Half(uint32_t start, uint32_t end)
 
 #endif 
 
+#if 0
 /**
   * @brief  添加到搜索缓冲区（处理跨缓冲区问题）
   */
@@ -400,7 +503,7 @@ static void Process_Search_Buffer(void)
         /* 快速预检查 */
        
          /* 解析帧 */
-          if(parse_hlw8032_frame(potential_frame))
+          if(parse_hlw8032_frame(&hlw8032_rxbuf))
           {
                     /* 成功解析，标记帧就绪 */
                     hlw0803_frame_ready = true;
@@ -456,3 +559,4 @@ void Process_New_DMA_Data(uint32_t start, uint32_t end)
     Process_Search_Buffer();
 }
 
+#endif 

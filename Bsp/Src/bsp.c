@@ -32,7 +32,6 @@ uint8_t bcc_check(const unsigned char *data, int len)
   {
   
    INA219_I2C_GPIO_Init();
-   USART1_DMA_RX_Init();
    callback_register_fun();
   
    

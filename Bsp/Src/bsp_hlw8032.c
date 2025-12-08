@@ -2,7 +2,7 @@
 
 uint8_t hlw8032_rxbuf[HLW8032_FRAME_SIZE]={0};
 
-volatile uint8_t hlw8032_rx_done = 0;
+volatile uint8_t hlw8032_rx_half_flag = 0;
 
 typedef struct {
     uint32_t voltage;
@@ -32,7 +32,7 @@ typedef struct {
 
 
 
-volatile uint8_t  hlw8032_rx_done ; //= 1;   // 一帧接收完成
+volatile uint8_t  hlw8032_rx_half_flag ; //= 1;   // 一帧接收完成
 
 /*
 	*@brief: 
@@ -40,6 +40,7 @@ volatile uint8_t  hlw8032_rx_done ; //= 1;   // 一帧接收完成
 	*@param:
 	*@retval:
 */
+#if 0
 void USART1_DMA_RX_Init(void)
 {
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
@@ -50,12 +51,14 @@ void USART1_DMA_RX_Init(void)
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, HLW8032_FRAME_LEN);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
 }
+#endif 
 /*
 	*@brief: 
 	*@note:
 	*@param:
 	*@retval:
 */
+#if 0
 void HLW8032_ParseFrame(uint8_t *buf)
 {
     // 校验
@@ -72,22 +75,8 @@ void HLW8032_ParseFrame(uint8_t *buf)
     // 功率寄存器 (示例：第 16~18 字节)
     hlw_data.power = ((uint32_t)buf[16] << 16) | ((uint32_t)buf[17] << 8) | buf[18];
 }
+#endif 
 
-/*
-	*@brief: 
-	*@note:
-	*@param:
-	*@retval:
-*/
-void hlw8032_red_value(void)
-{
-	if(hlw8032_rx_done){
-	    hlw8032_rx_done = 0;
-	    HLW8032_ParseFrame(hlw8032_rxbuf);
-	    // hlw_data.voltage / current / power 可直接使用
-	}
-
-}
 /*
 	*@brief: 
 	*@note:
