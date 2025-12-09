@@ -72,11 +72,13 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_KEY_Pin LL_GPIO_PIN_15
 #define LED_KEY_GPIO_Port GPIOC
+//GPIO RELAY 
 #define RELAY_CTL_Pin LL_GPIO_PIN_1
 #define RELAY_CTL_GPIO_Port GPIOA
-
+//GPIO PINCH WITH MOTOR
 #define PINCH_Pin LL_GPIO_PIN_6
 #define PINCH_GPIO_Port GPIOA
+//GPIO MOTOR 
 #define MOTOR_POS_UP_Pin LL_GPIO_PIN_7
 #define MOTOR_POS_UP_GPIO_Port GPIOA
 #define MOTOR_POS_DOWN_Pin LL_GPIO_PIN_0

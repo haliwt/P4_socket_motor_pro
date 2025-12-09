@@ -34,6 +34,7 @@
 #include "bsp_motor.h"
 #include "bsp_machine.h"
 #include "bsp_hlw8032_app.h"
+#include "bsp_relay.h"
 
 #include "bsp_power_meter.h"
 #include "bsp_usb_meter.h"
@@ -92,6 +93,8 @@ extern uint8_t inputBuf[1];
 typedef struct PROCESS_T{
 
   uint8_t gpower_flag;
+
+  uint8_t parse_hlw8032_data_flag;
   
   uint8_t gTimer_smg_counter;
   uint8_t gTimer_key_counter;
@@ -102,6 +105,7 @@ typedef struct PROCESS_T{
 extern process_t gpro_t;
 
 void bsp_init(void);
+
 
 
 #endif 

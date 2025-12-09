@@ -1,6 +1,6 @@
 #include "bsp.h"
 
-uint8_t hlw8032_rxbuf[HLW8032_FRAME_SIZE]={0};
+uint8_t hlw8032_rxbuf[HLW8032_DMA_RX_BUFFER_SIZE]={0};
 
 volatile uint8_t hlw8032_rx_half_flag = 0;
 

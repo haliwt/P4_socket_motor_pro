@@ -129,7 +129,10 @@ void motor_pause(void)
  */
 uint8_t motor_run_state_ref(void)
 {
-   return glmotor_t.motor_run_flag;
+   
+    return glmotor_t.motor_run_flag;
+   
+   
 
 }
 /**

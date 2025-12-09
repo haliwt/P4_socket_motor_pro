@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "bsp.h"
 /* USER CODE END Includes */
+uint8_t hlw8032_data;
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -144,18 +145,14 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
 
 
-   
+   #if 0
    if(LL_DMA_IsActiveFlag_HT4(DMA1)){
      	LL_DMA_ClearFlag_HT4(DMA1);
 		hlw8032_rx_half_flag=0;// 半帧接收完成
         
 		 /* 新数据范围：从上次处理位置到缓冲区中点 */
    
-
-        hlw8032_rx_half_flag =0;
-		
-        
-        /* 处理新数据 */
+         /* 处理新数据 */
         //Process_New_DMA_Data(new_data_start, new_data_end);
          HLW8032_ProcessData();
         /* 更新处理位置 */
@@ -163,6 +160,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
         
        
    	}
+   #endif 
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
 
@@ -173,12 +171,16 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
         
       /* 新数据范围：从上次处理位置到缓冲区末尾 */
    
-
+         
 		 hlw8032_rx_half_flag=1;
         
         /* 处理新数据 */
         //Process_New_DMA_Data(new_data_start, new_data_end);
-        HLW8032_ProcessData();
+        if(hlw8032_rx_half_flag==1 && gpro_t.parse_hlw8032_data_flag ==0 && gpro_t.gpower_flag == power_on){
+		  hlw8032_rx_half_flag++;
+          HLW8032_ProcessData();
+
+        }
         
         /* 更新处理位置 */
        
@@ -229,7 +231,27 @@ void TIM17_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+     
+//  if (LL_USART_IsActiveFlag_IDLE(USART1)) {
+//    LL_USART_ClearFlag_IDLE(USART1);
+//	hlw8032_data = LL_USART_ReceiveData8(USART1);
 
+//   #if 0
+//    // 当前DMA写入位置 = size - NDTR
+//    uint16_t write_pos = HLW8032_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4);
+
+//    if (write_pos >= hlw_dma_last_pos) {
+//      HLW8032_ProcessSegment((uint8_t*)&hlw8032_dma_buf[hlw_dma_last_pos],
+//                             write_pos - hlw_dma_last_pos);
+//    } else {
+//      HLW8032_ProcessSegment((uint8_t*)&hlw8032_dma_buf[hlw_dma_last_pos],
+//                             HLW8032_DMA_RX_BUFFER_SIZE - hlw_dma_last_pos);
+//      HLW8032_ProcessSegment((uint8_t*)&hlw8032_dma_buf[0],
+//                             write_pos);
+//    }
+//    hlw_dma_last_pos = write_pos;
+//	#endif 
+//  }
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */
 

@@ -47,7 +47,7 @@ typedef struct {
 HLW0803_DataFrame_t hlw8032_frame_t;
 HLW0803_Measure_t   hlw8032_measure_t;
 
-
+uint8_t copy_hlw8032_buf[48];
 static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out ,HLW0803_Measure_t *mease_out);
 /**
   * @brief  开始校正电压,电流,功率系数
@@ -275,31 +275,26 @@ uint8_t HLW8032_ProcessData(void)
 	        }
 	    }
     }
-	else if(hlw8032_rx_half_flag  == 1)//dma receive data complete finish
+	else if(hlw8032_rx_half_flag  == 2)//dma receive data complete finish
     {
-       
-		current_buffer = &hlw8032_rxbuf[24];//1.STATE REG original is the "24"
-	    buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
-		frame_start = find_frame_start(hlw8032_rxbuf, buffer_size);
-	    if (frame_start >= 0)
+       hlw8032_rx_half_flag++;
+	   gpro_t.parse_hlw8032_data_flag = 1;
+		//current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
+	    //buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
+		//frame_start = find_frame_start(hlw8032_rxbuf, 24);
+	    //if (frame_start >= 0)
 	    {
 	        // 解析数据帧
-	        if (parse_hlw8032_frame(hlw8032_rxbuf, &hlw8032_frame_t,&hlw8032_measure_t))
-	        {
-	            new_data = 1;
-	        }
-	    }
+	        memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
+	      //  parse_hlw8032_frame(copy_hlw8032_buf, &hlw8032_frame_t,&hlw8032_measure_t);
+	       
+	    //}
        
     }
-    else
-    {
-        // 未找到有效帧头，可尝试重新同步
-       // data->frame_sync = false;
-       // data->error_count++;
-    }
+   }
     
     
-    return new_data;
+    return 1;
 }
 
 /**

@@ -89,7 +89,7 @@ void MX_USART1_UART_Init(void)
 
   LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PRIORITY_LOW);
 
-  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_NORMAL);
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_CIRCULAR );//WT.EDIT LL_DMA_MODE_NORMAL);//
 
   LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PERIPH_NOINCREMENT);
 
@@ -144,10 +144,13 @@ void MX_USART1_UART_Init(void)
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, HLW8032_DMA_RX_BUFFER_SIZE);
     
     // 使能DMA中断：半传输完成和传输完成
-    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_4);
+     // 6) Enable DMA IRQ if你要用 HT/TC 中断回调处理
+    //LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_4);
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_4);
     
     // 5. 使能USART1的DMA接收
+   // LL_USART_EnableIT_IDLE(USART1);//空闲中断
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);    // 关键：启用通道
     LL_USART_EnableDMAReq_RX(USART1);
   /* USER CODE END USART1_Init 2 */
 
