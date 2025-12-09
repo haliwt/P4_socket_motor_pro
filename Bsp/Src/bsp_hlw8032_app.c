@@ -146,8 +146,7 @@ static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *fra
    uint8_t error_count;
   // 1. 检查帧头
     if (frame[0] != 0x55 || frame[1] != 0x5A) {
-		hlw8032_rxbuf[0]=0;
-		hlw8032_rxbuf[1]=0;
+	
         return 0;
     }
     
@@ -275,7 +274,7 @@ uint8_t HLW8032_ProcessData(void)
 	        }
 	    }
     }
-	else if(hlw8032_rx_half_flag  == 2)//dma receive data complete finish
+	else if(hlw8032_rx_half_flag  == 1)//dma receive data complete finish
     {
        hlw8032_rx_half_flag++;
 	   gpro_t.parse_hlw8032_data_flag = 1;
@@ -286,7 +285,7 @@ uint8_t HLW8032_ProcessData(void)
 	    {
 	        // 解析数据帧
 	        memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
-	      //  parse_hlw8032_frame(copy_hlw8032_buf, &hlw8032_frame_t,&hlw8032_measure_t);
+	        parse_hlw8032_frame(copy_hlw8032_buf, &hlw8032_frame_t,&hlw8032_measure_t);
 	       
 	    //}
        

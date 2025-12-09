@@ -40,16 +40,35 @@ volatile uint8_t  hlw8032_rx_half_flag ; //= 1;   // 一帧接收完成
 	*@param:
 	*@retval:
 */
-#if 0
-void USART1_DMA_RX_Init(void)
+#if 1
+void HLW8032_StartDMA(void)
 {
-    LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
-        LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_RECEIVE),
-        (uint32_t)hlw8032_rxbuf,
-        LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+  // 禁用DMA
+     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
 
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, HLW8032_FRAME_LEN);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
+	  // 配置外设和内存地址
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
+        LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_RECEIVE), // 外设地址
+        (uint32_t)hlw8032_rxbuf,                                         // 内存地址
+        LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    
+    // 清除缓冲区
+   // memset(dma_rx_buffer, 0, HLW8032_DMA_RX_BUFFER_SIZE);
+    
+     // 设置数据长度（双缓冲总长度）
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4,HLW8032_FRAME_SIZE);
+    
+    // 使能DMA中断：半传输完成和传输完成
+     // 6) Enable DMA IRQ if你要用 HT/TC 中断回调处理
+    //LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_4);
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_4);
+    
+    // 5. 使能USART1的DMA接收
+   // LL_USART_EnableIT_IDLE(USART1);//空闲中断
+    LL_USART_Enable(USART1);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);    // 关键：启用通道
+    LL_USART_EnableDMAReq_RX(USART1);
+   
 }
 #endif 
 /*
@@ -58,7 +77,7 @@ void USART1_DMA_RX_Init(void)
 	*@param:
 	*@retval:
 */
-#if 0
+#if  0
 void HLW8032_ParseFrame(uint8_t *buf)
 {
     // 校验
