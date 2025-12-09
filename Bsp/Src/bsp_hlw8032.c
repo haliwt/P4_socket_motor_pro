@@ -46,6 +46,8 @@ void HLW8032_StartDMA(void)
   // 禁用DMA
      LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
 
+	  memset(hlw8032_rxbuf, 0, HLW8032_FRAME_SIZE);
+
 	  // 配置外设和内存地址
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
         LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_RECEIVE), // 外设地址
@@ -53,7 +55,7 @@ void HLW8032_StartDMA(void)
         LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
     
     // 清除缓冲区
-   // memset(dma_rx_buffer, 0, HLW8032_DMA_RX_BUFFER_SIZE);
+     
     
      // 设置数据长度（双缓冲总长度）
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4,HLW8032_FRAME_SIZE);
