@@ -48,6 +48,8 @@ HLW0803_DataFrame_t hlw8032_frame_t;
 HLW0803_Measure_t   hlw8032_measure_t;
 
 uint8_t copy_hlw8032_buf[48];
+uint8_t rx_frame_sum;
+
 static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out ,HLW0803_Measure_t *mease_out);
 /**
   * @brief  开始校正电压,电流,功率系数
@@ -79,40 +81,32 @@ void caliration_hlw8032_factor(void)
   * @param  size: 缓冲区大小
   * @retval 有效帧起始索引，-1表示未找到
   */
-static int find_frame_start(const uint8_t* buffer, int size)
+static int find_frame_start(const uint8_t* buffer)
 {
     // HLW8032帧头：stateREG =0x55 ---芯片误差修正正常, checkREG:0x5A --default is data
-    if(size < 24){
-	    for (int i = 0; i < size; i++)//for (int i = 0; i < size - HLW8032_FRAME_SIZE + 1; i++)
+        uint16_t total_sum=0 ;
+        uint8_t i, uint8_data ; 
+	    for (i=2 ; i <23; i++)//for (int i = 0; i < size - HLW8032_FRAME_SIZE + 1; i++)
 	    {
-	        if (buffer[i] == 0x55 && buffer[i + 1] == 0x5A)
-	        {
-//	            // 确保有足够的数据构成完整帧
-//	            if (i + HLW8032_FRAME_SIZE <= size + 1)
-//	            {
-//	                return i;
-//	            }
-                return 1;
+	         total_sum = buffer[i] + total_sum;
+             if(i==22){
+
+			   uint8_data = (uint8_t)total_sum;
+			   if(uint8_data == buffer[23]){
+			      return 1;
+
+			   	}
+			    else{
+
+				   return -1;
+
+				}
+
+             }
 				
-	        }
-	    }
-    }
-	else if(size > 23){
-
-	for (int i = 0; i < size; i++)//for (int i = 0; i < size - HLW8032_FRAME_SIZE + 1; i++)
-	{
-			   if (buffer[size+i] == 0x55 && buffer[i +size+1] == 0x5A)
-			   {
-				   // 确保有足够的数据构成完整帧
-//				   if (i + HLW8032_FRAME_SIZE <= size)
-//				   {
-//					   return i;
-//				   }
-                   return 1;
-			   }
-		   }
-
-	}
+        }
+	    
+    
 	
     return -1;
 }
@@ -124,7 +118,7 @@ static int find_frame_start(const uint8_t* buffer, int size)
   * @param  data: 数据存储结构体
   * @retval true: 解析成功, false: 解析失败
   */
-static inline uint8_t hlw8032_calc_checksum(const uint8_t *frame)
+static  uint8_t hlw8032_calc_checksum(const uint8_t *frame)
 {
     uint8_t sum = 0;
     const uint8_t *p = frame + 2;
@@ -143,25 +137,7 @@ static inline uint8_t hlw8032_calc_checksum(const uint8_t *frame)
 static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out,HLW0803_Measure_t  *measure_out)
 {
 
-   uint8_t error_count;
-  // 1. 检查帧头
-    if (frame[0] != 0x55 || frame[1] != 0x5A) {
-	
-        return 0;
-    }
-    
-    // 2. 校验和验证
-    uint8_t checksum = 0;
-    for (int i = 2; i < 23; i++) {
-        checksum += frame[i];
-    }
-    if (checksum != frame[23]) {
-        error_count++;
-        return 0;
-    }
-    
-    // 3. 解析状态寄存器（字节2）
-    hlw8032_measure_t.status_ref = frame[2];
+   
     
     // 4. 解析所有寄存器（小端格式）
     // 4.1 电压参数寄存器 (字节3-5)
@@ -251,49 +227,27 @@ static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *fra
 uint8_t HLW8032_ProcessData(void)
 {
 
-     int8_t frame_start;
+     
 
-
-    uint8_t new_data = 0;
-    uint8_t* current_buffer;
-    int buffer_size;
-    
-    // 确定当前活动缓冲区
-    if (hlw8032_rx_half_flag  == 0) //dma rx data half finish
-    {
-           current_buffer = &hlw8032_rxbuf[0];//1.STATE REG 
-	       buffer_size = HLW8032_DMA_RX_BUFFER_SIZE / 2;
-	      // 查找有效帧
-	    frame_start = find_frame_start(hlw8032_rxbuf, buffer_size);
-	    if (frame_start >= 0)
-	    {
-	        // 解析数据帧
-	        if(parse_hlw8032_frame(hlw8032_rxbuf,&hlw8032_frame_t,&hlw8032_measure_t))
-	        {
-	            new_data = 1;
-	        }
-	    }
-    }
-	else if(hlw8032_rx_half_flag  == 1)//dma receive data complete finish
-    {
-       hlw8032_rx_half_flag++;
 	   gpro_t.parse_hlw8032_data_flag = 1;
 		//current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
 	    //buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
-		//frame_start = find_frame_start(hlw8032_rxbuf, 24);
-	    //if (frame_start >= 0)
+	   rx_frame_sum =   hlw8032_calc_checksum(hlw8032_rxbuf);
+		 
+	    if (rx_frame_sum == hlw8032_rxbuf[23])
 	    {
 	        // 解析数据帧
-	        memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
-	        parse_hlw8032_frame(copy_hlw8032_buf, &hlw8032_frame_t,&hlw8032_measure_t);
+	       // memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
+	        parse_hlw8032_frame(hlw8032_rxbuf, &hlw8032_frame_t,&hlw8032_measure_t);
 	       
-	    //}
+	    }
+		else{
+           return 2;
+		   gpro_t.parse_hlw8032_data_flag = 0;
+           HLW8032_StartDMA();
+		}
        
-    }
-   }
-    
-    
-    return 1;
+       return 1;
 }
 
 /**

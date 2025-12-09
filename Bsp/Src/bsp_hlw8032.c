@@ -2,7 +2,7 @@
 
 uint8_t hlw8032_rxbuf[HLW8032_DMA_RX_BUFFER_SIZE]={0};
 
-volatile uint8_t hlw8032_rx_half_flag = 0;
+volatile uint8_t hlw8032_rx_tc_flag = 0;
 
 typedef struct {
     uint32_t voltage;
@@ -32,7 +32,7 @@ typedef struct {
 
 
 
-volatile uint8_t  hlw8032_rx_half_flag ; //= 1;   // 一帧接收完成
+volatile uint8_t  hlw8032_rx_tc_flag ; //= 1;   // 一帧接收完成
 
 /*
 	*@brief: 

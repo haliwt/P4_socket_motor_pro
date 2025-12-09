@@ -148,7 +148,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
    #if 0
    if(LL_DMA_IsActiveFlag_HT4(DMA1)){
      	LL_DMA_ClearFlag_HT4(DMA1);
-		hlw8032_rx_half_flag=0;// 半帧接收完成
+		hlw8032_rx_tc_flag=0;// 半帧接收完成
         
 		 /* 新数据范围：从上次处理位置到缓冲区中点 */
    
@@ -171,13 +171,10 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
         
       /* 新数据范围：从上次处理位置到缓冲区末尾 */
    
-         
-	     hlw8032_rx_half_flag=1;
-
-		 if(hlw8032_rxbuf[0] == 0x55 ||hlw8032_rxbuf[0]==0xaa ||hlw8032_rxbuf[0]== hlw8032_rxbuf[0] & 0xF0){
+        if(hlw8032_rxbuf[0] == 0x55 ||hlw8032_rxbuf[0]==0xaa){
 
                 if(hlw8032_rxbuf[1]==0x5A){
-					hlw8032_rx_half_flag=1;
+					hlw8032_rx_tc_flag=1;
 
 				    HLW8032_ProcessData();
 
@@ -185,20 +182,20 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
 				else{
 				hlw8032_rxbuf[0]=0;
 
-				hlw8032_rx_half_flag=0;
+				hlw8032_rx_tc_flag=0;
 			    HLW8032_StartDMA();
 
 				}
 		 }
 		 else{
  
-		     hlw8032_rx_half_flag=0;
+		     hlw8032_rx_tc_flag=0;
              HLW8032_StartDMA();
 		 }
         
         /* 处理新数据 */
         //Process_New_DMA_Data(new_data_start, new_data_end);
-//        if(hlw8032_rx_half_flag==1 && gpro_t.parse_hlw8032_data_flag ==0 && gpro_t.gpower_flag == power_on){
+//        if(hlw8032_rx_tc_flag==1 && gpro_t.parse_hlw8032_data_flag ==0 && gpro_t.gpower_flag == power_on){
 		  
 //          HLW8032_ProcessData();
 

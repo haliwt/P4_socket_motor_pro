@@ -13,7 +13,7 @@
 
 extern uint8_t hlw8032_rxbuf[HLW8032_DMA_RX_BUFFER_SIZE];
 
-extern volatile uint8_t  hlw8032_rx_half_flag;
+extern volatile uint8_t  hlw8032_rx_tc_flag;
 
 void HLW8032_StartDMA(void);
 
