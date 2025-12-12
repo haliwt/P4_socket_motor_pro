@@ -58,8 +58,9 @@ HLW0803_Measure_t   hlw8032_measure_t;
 
 uint8_t rx_frame_sum;
 uint8_t  found = 0;
+uint8_t	start_index ;
 
-static uint8_t hlw8032_extract_frame(void);
+
 
 static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out ,HLW0803_Measure_t *mease_out);
 
@@ -148,31 +149,58 @@ static  uint8_t hlw8032_calc_checksum(const uint8_t *frame)
 	*@param:
 	*@retval:
 */
-static uint8_t  hlw8032_extract_frame(void)
+void hlw8032_extract_frame(void)
 {
-    static uint8_t  start_index ;
+   
 	uint8_t i; 
-	if(found ==0){
-    for (i = 0; i < HLW8032_READ_FRAME_SIZE; i++) {
-        if (hlw8032_rxbuf[i] == 0x55 && hlw8032_rxbuf[i+1] == 0xAA) {
+
+    for (i = 0; i < HLW8032_READ_RXBUF_SIZE; i++) {
+        if (hlw8032_rxbuf[i] == 0x55 && hlw8032_rxbuf[i+1] == 0x5A) {
             // 找到帧头，复制完整24字节 (包含0x55,0xAA)
          
             start_index = i; // 从 0x55 的位置开始复制
-           // memcpy(hlw8032_frame, &hlw8032_rxbuf[i+2], HLW8032_FRAME_SIZE);
-            found = 1;
-           break;
-        }
-		
-    }
-	}
+            if(start_index > 24){
 
-	 // 步骤 2: 复制包括 0x55, 0xAA 在内的共 24 个元素并解析
-    // 确保从 start_index 开始有足够的空间容纳 COPY_SIZE (24) 个元素
-    //if (start_index = numbers && (start_index + HLW8032_READ_FRAME_SIZE) <= ORIGINAL_SIZE) {
-        // 使用 memcpy 从 start_index 处开始复制 24 个字节
+			   found = 0;
+			    break;
+
+			}
+            else{
+			 found = 1;
+			 break;
+            }
+
+		}
+		else if(hlw8032_rxbuf[i] == 0xF2 && hlw8032_rxbuf[i+1] == 0x5A){
+
+				hlw8032_rx_tc_flag=0;
+                gpro_t.rx_index = 0;
+		        found = 0;
+				
+				break;
+
+
+
+		}
+         
+         
+    }
+	  
+    
+	
+    
+	
+      if(found == 1){
+			found ++ ;
         memcpy(hlw8032_frame, &hlw8032_rxbuf[start_index],HLW8032_READ_FRAME_SIZE);
+
+      }
         
       
+	// 步骤 2: 复制包括 0x55, 0xAA 在内的共 24 个元素并解析
+	   // 确保从 start_index 开始有足够的空间容纳 COPY_SIZE (24) 个元素
+	   //if (start_index = numbers && (start_index + HLW8032_READ_FRAME_SIZE) <= ORIGINAL_SIZE) {
+		   // 使用 memcpy 从 start_index 处开始复制 24 个字节
 
 }
 
@@ -183,9 +211,9 @@ static uint8_t  hlw8032_extract_frame(void)
   */
 void HLW8032_ParseData(void)
 {
-        hlw8032_extract_frame();
+      
 
-       if(found==1){
+       if(found==2){
 
 	
 	        //current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
@@ -198,7 +226,7 @@ void HLW8032_ParseData(void)
 		      
 		        parse_hlw8032_frame(hlw8032_frame, &hlw8032_frame_t,&hlw8032_measure_t);
 			    
-		       // found = 0;
+		        found ++;
 		    }
 			else{
 	     

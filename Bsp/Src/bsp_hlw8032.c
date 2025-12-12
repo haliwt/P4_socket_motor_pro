@@ -172,9 +172,16 @@ void hlw8032_run_process_handler(void)
 
     
 	if(hlw8032_rx_tc_flag==1){
+	   hlw8032_rx_tc_flag++;
+	   hlw8032_extract_frame();
+	   
 	
+	}
+	else if(hlw8032_rx_tc_flag==2){
+
 	   HLW8032_ParseData();
-	
+
+
 	}
 
 
