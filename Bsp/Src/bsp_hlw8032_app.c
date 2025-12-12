@@ -23,12 +23,12 @@ typedef struct {
 
 /* 解析后的工程值 */
 typedef struct {
-    uint32_t voltage_param_ref;      // 电压 (V)
-    uint32_t voltage_ref;
-    uint32_t  current_param_ref;      // 电流 (A)
-    uint32_t current_ref;
-    uint32_t  power_param_ref;        // 功率 (W)
-    uint8_t  power_ref;
+    float voltage_param_ref;      // 电压 (V)
+    float voltage_ref;
+    float  current_param_ref;      // 电流 (A)
+    float current_ref;
+    float  power_param_ref;        // 功率 (W)
+    float  power_ref;
 	float    voltage_v;
 	float    current_a;
 	float    power_w;

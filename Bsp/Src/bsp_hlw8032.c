@@ -190,6 +190,8 @@ void hlw8032_run_process_handler(void)
 	if(hlw8032_rx_tc_flag==1){
 	
 	   HLW8032_ParseData();
+	   hlw8032_rx_tc_flag=0;
+	   HLW8032_StartDMA();
 	}
 
 

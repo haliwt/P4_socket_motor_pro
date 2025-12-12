@@ -171,7 +171,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
         
       /* 新数据范围：从上次处理位置到缓冲区末尾 */
    
-        if(hlw8032_rxbuf[0] == 0x55 ||hlw8032_rxbuf[0]==0xaa) && hlw8032_rx_tc_flag==0){
+        if((hlw8032_rxbuf[0] == 0x55 ||hlw8032_rxbuf[0]==0xaa) && hlw8032_rx_tc_flag==0){
 
                 if(hlw8032_rxbuf[1]==0x5A){
 					hlw8032_rx_tc_flag=1;
@@ -180,6 +180,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
 
 				}
 				else{
+			
 				hlw8032_rxbuf[0]=0;
 
 				hlw8032_rx_tc_flag=0;
@@ -188,7 +189,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
 				}
 		 }
 		 else{
- 
+             hlw8032_rxbuf[0]=0;
 		     hlw8032_rx_tc_flag=0;
              HLW8032_StartDMA();
 		 }

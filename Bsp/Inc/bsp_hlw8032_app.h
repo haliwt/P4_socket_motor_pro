@@ -9,11 +9,11 @@
 // 电流,电压,功率测量部分---电压系数,电流系数,功率系数
 // ===========================================
 // 需要你确认的电压分压参数
-#define HLW8032_VOLTAGE_COEFF     1
+#define HLW8032_VOLTAGE_COEFF     1.14
 
-#define HLW8032_CURRENT_COEFF     1
+#define HLW8032_CURRENT_COEFF     82.21
 
-#define  HLW8032_POWER_COEFF      1
+#define  HLW8032_POWER_COEFF      0.015
 
 // 校准系数（必须根据实际硬件调整）
 //extern float HLW8032_VOLTAGE_COEFF;    // 电压系数
