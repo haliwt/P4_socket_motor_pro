@@ -66,6 +66,7 @@ void MX_USART1_UART_Init(void)
   /* USART1 DMA Init */
 
   /* USART1_RX Init */
+  #if 1
   LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_4, LL_DMAMUX_REQ_USART1_RX);
 
   LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_4, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
@@ -81,8 +82,10 @@ void MX_USART1_UART_Init(void)
   LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PDATAALIGN_BYTE);
 
   LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MDATAALIGN_BYTE);
+  #endif 
 
   /* USART1_TX Init */
+  #if 0
   LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_5, LL_DMAMUX_REQ_USART1_TX);
 
   LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
@@ -98,9 +101,9 @@ void MX_USART1_UART_Init(void)
   LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PDATAALIGN_BYTE);
 
   LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MDATAALIGN_BYTE);
-
+  #endif 
   /* USART1 interrupt Init */
-  NVIC_SetPriority(USART1_IRQn, 3);
+  NVIC_SetPriority(USART1_IRQn, 1);//3
   NVIC_EnableIRQ(USART1_IRQn);
 
   /* USER CODE BEGIN USART1_Init 1 */
@@ -134,6 +137,7 @@ void MX_USART1_UART_Init(void)
 
 
   /* USER CODE BEGIN USART1_Init 2 */
+  #if 0
 	  // 配置外设和内存地址
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4,
         LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_RECEIVE), // 外设地址
@@ -152,6 +156,12 @@ void MX_USART1_UART_Init(void)
    // LL_USART_EnableIT_IDLE(USART1);//空闲中断
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);    // 关键：启用通道
     LL_USART_EnableDMAReq_RX(USART1);
+	#endif 
+	// 启用接收中断
+	 LL_USART_IsEnabledIT_RXNE(USART1);
+     LL_USART_EnableIT_RXNE(USART1);   // RXNE 中断
+   
+     //LL_USART_EnableIT_ERROR(USART1);  // 错误中断（可选）
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -249,7 +259,7 @@ void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN WKUPType USART2 */
 
   /* USER CODE END WKUPType USART2 */
-
+   LL_USART_IsEnabledIT_RXNE(USART1);
   LL_USART_Enable(USART2);
 
   /* Polling USART2 initialisation */

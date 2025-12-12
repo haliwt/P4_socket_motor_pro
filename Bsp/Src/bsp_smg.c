@@ -85,7 +85,7 @@ void works_disp_hanlder(void)
 	 break;
 
 	 case smg_voltage:
-      glsmg_t.read_ac_voltage= read_ac_voltage_value();
+    
 	  disp_voltage_3bit_value(glsmg_t.read_ac_voltage);
 	  motor_detect_pinch(); 
 	  display_usb_kw_symbol();

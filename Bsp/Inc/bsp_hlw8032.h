@@ -15,13 +15,8 @@ extern uint8_t hlw8032_rxbuf[HLW8032_DMA_RX_BUFFER_SIZE];
 
 extern volatile uint8_t  hlw8032_rx_tc_flag;
 
-void HLW8032_StartDMA(void);
+//void HLW8032_StartDMA(void);
 
-uint16_t read_ac_voltage_value(void);
-
-uint8_t read_total_kw_decade_value(void);
-
-uint8_t read_total_kw_uint_value(void);
 
 void hlw8032_run_process_handler(void);
 

@@ -163,7 +163,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
    #endif 
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 0 */
   /* USER CODE BEGIN DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
-
+    #if 0
        /* 检查传输完成中断 */
     if(LL_DMA_IsActiveFlag_TC4(DMA1))
     {
@@ -210,7 +210,7 @@ void DMA1_Ch4_5_DMAMUX1_OVR_IRQHandler(void)
 	if(LL_DMA_IsActiveFlag_TE4(DMA1)){
   	  LL_DMA_ClearFlag_TE4(DMA1);
     }
-
+    #endif 
   	
   /* USER CODE END DMA1_Ch4_5_DMAMUX1_OVR_IRQn 1 */
 }
@@ -252,27 +252,23 @@ void TIM17_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-     
-//  if (LL_USART_IsActiveFlag_IDLE(USART1)) {
-//    LL_USART_ClearFlag_IDLE(USART1);
-//	hlw8032_data = LL_USART_ReceiveData8(USART1);
+    
+    // 接收中断
+    if(LL_USART_IsActiveFlag_RXNE(USART1) )
+    {
+       
 
-//   #if 0
-//    // 当前DMA写入位置 = size - NDTR
-//    uint16_t write_pos = HLW8032_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4);
+		hlw8032_data =(uint8_t)LL_USART_ReceiveData9(USART1); // 因为你配置的是 9bit + EVEN parity
 
-//    if (write_pos >= hlw_dma_last_pos) {
-//      HLW8032_ProcessSegment((uint8_t*)&hlw8032_dma_buf[hlw_dma_last_pos],
-//                             write_pos - hlw_dma_last_pos);
-//    } else {
-//      HLW8032_ProcessSegment((uint8_t*)&hlw8032_dma_buf[hlw_dma_last_pos],
-//                             HLW8032_DMA_RX_BUFFER_SIZE - hlw_dma_last_pos);
-//      HLW8032_ProcessSegment((uint8_t*)&hlw8032_dma_buf[0],
-//                             write_pos);
-//    }
-//    hlw_dma_last_pos = write_pos;
-//	#endif 
-//  }
+		
+        usart1_callback_isr(hlw8032_data);
+		
+	 }
+
+    // 错误处理（可选）
+    if(LL_USART_IsActiveFlag_ORE(USART1)) {
+        LL_USART_ClearFlag_ORE(USART1);
+    }
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */
 

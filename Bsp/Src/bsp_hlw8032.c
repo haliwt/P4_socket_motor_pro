@@ -4,6 +4,8 @@ uint8_t hlw8032_rxbuf[HLW8032_DMA_RX_BUFFER_SIZE]={0};
 
 volatile uint8_t hlw8032_rx_tc_flag = 0;
 
+#if 0
+
 typedef struct {
     uint32_t voltage;
     uint32_t current;
@@ -149,33 +151,15 @@ void hlw_convert_tp(const hlw_regs_t *r, const hlw_cal_t *c,float *V, float *I, 
     *P = c->Kp * rp + c->Pb;
 }
 
+#endif 
+
 /*
 	*@brief:  
 	*@note:
 	*@param:
 	*@retval:
 */
-uint16_t read_ac_voltage_value(void)
-{
 
-    return (uint16_t)hlw_data.voltage;
-
-}
-
-uint8_t read_total_kw_decade_value(void)
-{
-  
-   if(hlw_data.power > 0) return (uint8_t)hlw_data.power;
-   else return 0;
-   
-}
-
-uint8_t read_total_kw_uint_value(void)
-{
-  
-   if(hlw_data.power == 0) return (uint8_t)hlw_data.power;
-   
-}
 
 /*
 	*@brief: IC HLW8032 handler
@@ -190,8 +174,7 @@ void hlw8032_run_process_handler(void)
 	if(hlw8032_rx_tc_flag==1){
 	
 	   HLW8032_ParseData();
-	   hlw8032_rx_tc_flag=0;
-	   HLW8032_StartDMA();
+	
 	}
 
 
@@ -208,5 +191,11 @@ void hlw8032_run_process_handler(void)
 	*@retval:
 */
 
+
+/**
+  * @brief  处理接收到的数据
+  * @param  data: 数据存储结构体指针
+  * @retval true: 有新数据, false: 无新数据
+  */
 
 

@@ -43,6 +43,7 @@
 #include "bsp_adc.h"
 #include "bsp_hlw8032.h"
 #include "bsp_ina219.h"
+#include "bsp_usart.h"
 
 
 #include "interrupt_manager.h"
@@ -94,7 +95,7 @@ typedef struct PROCESS_T{
 
   uint8_t gpower_flag;
 
-
+  uint8_t rx_index;
   
   uint8_t gTimer_smg_counter;
   uint8_t gTimer_key_counter;

@@ -1,6 +1,14 @@
 
 #include "bsp.h"
 
+#define HLW8032_READ_RXBUF_SIZE   48
+#define HLW8032_READ_FRAME_SIZE   24   // 帧头(2字节) + 数据(22字节)
+
+//uint8_t hlw8032_rxbuf[HLW8032_READ_RXBUF_SIZE];
+uint8_t hlw8032_frame[HLW8032_READ_FRAME_SIZE];
+
+
+
 //====================================================
 // 数据结构体
 // 在 HLW8032_Data_t 结构体中添加新字段
@@ -23,12 +31,12 @@ typedef struct {
 
 /* 解析后的工程值 */
 typedef struct {
-    float voltage_param_ref;      // 电压 (V)
-    float voltage_ref;
-    float  current_param_ref;      // 电流 (A)
-    float current_ref;
-    float  power_param_ref;        // 功率 (W)
-    float  power_ref;
+    uint32_t voltage_param_ref;      // 电压 (V)
+    uint32_t voltage_ref;
+    uint32_t  current_param_ref;      // 电流 (A)
+    uint32_t current_ref;
+    uint32_t  power_param_ref;        // 功率 (W)
+    uint32_t  power_ref;
 	float    voltage_v;
 	float    current_a;
 	float    power_w;
@@ -47,10 +55,15 @@ typedef struct {
 HLW0803_DataFrame_t hlw8032_frame_t;
 HLW0803_Measure_t   hlw8032_measure_t;
 
-uint8_t copy_hlw8032_buf[48];
+
 uint8_t rx_frame_sum;
+uint8_t  found = 0;
+
+static uint8_t hlw8032_extract_frame(void);
 
 static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *frame_out ,HLW0803_Measure_t *mease_out);
+
+
 /**
   * @brief  开始校正电压,电流,功率系数
   * @param  使用100W,电压 220V ,电流 I= 0.455A,W=100W.
@@ -126,6 +139,77 @@ static  uint8_t hlw8032_calc_checksum(const uint8_t *frame)
         sum += p[i];
     }
     return sum;
+}
+
+
+/*
+	*@brief: interrupt DMA callback
+	*@note:
+	*@param:
+	*@retval:
+*/
+static uint8_t  hlw8032_extract_frame(void)
+{
+    static uint8_t  start_index ;
+	uint8_t i; 
+	if(found ==0){
+    for (i = 0; i < HLW8032_READ_FRAME_SIZE; i++) {
+        if (hlw8032_rxbuf[i] == 0x55 && hlw8032_rxbuf[i+1] == 0xAA) {
+            // 找到帧头，复制完整24字节 (包含0x55,0xAA)
+         
+            start_index = i; // 从 0x55 的位置开始复制
+           // memcpy(hlw8032_frame, &hlw8032_rxbuf[i+2], HLW8032_FRAME_SIZE);
+            found = 1;
+           break;
+        }
+		
+    }
+	}
+
+	 // 步骤 2: 复制包括 0x55, 0xAA 在内的共 24 个元素并解析
+    // 确保从 start_index 开始有足够的空间容纳 COPY_SIZE (24) 个元素
+    //if (start_index = numbers && (start_index + HLW8032_READ_FRAME_SIZE) <= ORIGINAL_SIZE) {
+        // 使用 memcpy 从 start_index 处开始复制 24 个字节
+        memcpy(hlw8032_frame, &hlw8032_rxbuf[start_index],HLW8032_READ_FRAME_SIZE);
+        
+      
+
+}
+
+/**
+  * @brief  处理接收到的数据
+  * @param  data: 数据存储结构体指针
+  * @retval true: 有新数据, false: 无新数据
+  */
+void HLW8032_ParseData(void)
+{
+        hlw8032_extract_frame();
+
+       if(found==1){
+
+	
+	        //current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
+		    //buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
+		    rx_frame_sum =   hlw8032_calc_checksum(hlw8032_frame);
+			 
+		    if (rx_frame_sum == hlw8032_frame[23])
+		    {
+		        // 解析数据帧
+		      
+		        parse_hlw8032_frame(hlw8032_frame, &hlw8032_frame_t,&hlw8032_measure_t);
+			    
+		       // found = 0;
+		    }
+			else{
+	     
+			 //  hlw8032_rx_tc_flag=0;//go on read AC 220 power value 
+			  // found = 0;
+	         
+			}
+
+		}
+        
+      
 }
 
 /**
@@ -219,38 +303,7 @@ static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *fra
 }
 
 
-/**
-  * @brief  处理接收到的数据
-  * @param  data: 数据存储结构体指针
-  * @retval true: 有新数据, false: 无新数据
-  */
-uint8_t HLW8032_ParseData(void)
-{
 
-        //current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
-	    //buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
-	    rx_frame_sum =   hlw8032_calc_checksum(hlw8032_rxbuf);
-		 
-	    if (rx_frame_sum == hlw8032_rxbuf[23])
-	    {
-	        // 解析数据帧
-	        memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
-			hlw8032_rxbuf[0]=0;
-		    hlw8032_rxbuf[1]=0;
-	        parse_hlw8032_frame(copy_hlw8032_buf, &hlw8032_frame_t,&hlw8032_measure_t);
-	       
-	    }
-		else{
-           return 2;
-		   hlw8032_rx_tc_flag=0;//go on read AC 220 power value 
-
-		   hlw8032_rxbuf[0]=0;
-		   hlw8032_rxbuf[1]=0;
-           HLW8032_StartDMA();
-		}
-       
-       return 1;
-}
 
 /**
   * @brief  返回一个DMA USART TX HALF FLAG
