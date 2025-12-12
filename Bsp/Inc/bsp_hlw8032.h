@@ -23,6 +23,7 @@ uint8_t read_total_kw_decade_value(void);
 
 uint8_t read_total_kw_uint_value(void);
 
+void hlw8032_run_process_handler(void);
 
 
 

@@ -74,9 +74,9 @@
 
 void caliration_hlw8032_factor(void);
 
-uint8_t HLW8032_ProcessData(void);
+uint8_t HLW8032_ParseData(void);
 
-void hlw8032_output_vlaue(void);
+void hlw8032_output_value(void);
 
 #endif 
 

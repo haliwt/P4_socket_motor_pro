@@ -33,16 +33,16 @@ void main_process_handler(void)
 
  if(gpro_t.gpower_flag == power_on){
 
-   
+
+ 
      mainboard_control_handler();
 
 	 motor_main_run_process_handler();
 
       works_disp_hanlder();
-	  if(gpro_t.gTimer_read_total_w >3){
-	  	gpro_t.gTimer_read_total_w=0;
-	     hlw8032_output_vlaue();
-	  }
+
+	 hlw8032_run_process_handler();
+	
 
 
   } 

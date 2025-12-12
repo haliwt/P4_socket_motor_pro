@@ -94,7 +94,7 @@ typedef struct PROCESS_T{
 
   uint8_t gpower_flag;
 
-  uint8_t parse_hlw8032_data_flag;
+
   
   uint8_t gTimer_smg_counter;
   uint8_t gTimer_key_counter;

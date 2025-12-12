@@ -224,26 +224,28 @@ static uint8_t parse_hlw8032_frame(const uint8_t* frame,HLW0803_DataFrame_t *fra
   * @param  data: 数据存储结构体指针
   * @retval true: 有新数据, false: 无新数据
   */
-uint8_t HLW8032_ProcessData(void)
+uint8_t HLW8032_ParseData(void)
 {
 
-     
-
-	   gpro_t.parse_hlw8032_data_flag = 1;
-		//current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
+        //current_buffer = &hlw8032_rxbuf[0];//1.STATE REG original is the "24"
 	    //buffer_size = HLW8032_DMA_RX_BUFFER_SIZE ;
-	   rx_frame_sum =   hlw8032_calc_checksum(hlw8032_rxbuf);
+	    rx_frame_sum =   hlw8032_calc_checksum(hlw8032_rxbuf);
 		 
 	    if (rx_frame_sum == hlw8032_rxbuf[23])
 	    {
 	        // 解析数据帧
-	       // memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
-	        parse_hlw8032_frame(hlw8032_rxbuf, &hlw8032_frame_t,&hlw8032_measure_t);
+	        memcpy(copy_hlw8032_buf,hlw8032_rxbuf,sizeof(hlw8032_rxbuf));
+			hlw8032_rxbuf[0]=0;
+		    hlw8032_rxbuf[1]=0;
+	        parse_hlw8032_frame(copy_hlw8032_buf, &hlw8032_frame_t,&hlw8032_measure_t);
 	       
 	    }
 		else{
            return 2;
-		   gpro_t.parse_hlw8032_data_flag = 0;
+		   hlw8032_rx_tc_flag=0;//go on read AC 220 power value 
+
+		   hlw8032_rxbuf[0]=0;
+		   hlw8032_rxbuf[1]=0;
            HLW8032_StartDMA();
 		}
        
@@ -288,12 +290,12 @@ void HLW8032_ResetReception(void)
   * @param  data: 数据存储结构体指针
   * @retval true: 有新数据, false: 无新数据
   */
-void hlw8032_output_vlaue(void)
+void hlw8032_output_value(void)
 { 
    #if DEBUG_FLAG
    printf("voltage = %0.2f\n",hlw8032_measure_t.voltage_v);
    printf("current = %0.2f\n",hlw8032_measure_t.current_a);
-	printf("power_w = %0.2f\n",hlw8032_measure_t.power_w);
+   printf("power_w = %0.2f\n",hlw8032_measure_t.power_w);
   #endif 
 }
 

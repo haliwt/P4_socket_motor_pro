@@ -177,6 +177,34 @@ uint8_t read_total_kw_uint_value(void)
    
 }
 
+/*
+	*@brief: IC HLW8032 handler
+	*@note:
+	*@param:
+	*@retval:
+*/
+void hlw8032_run_process_handler(void)
+{
+
+    
+	if(hlw8032_rx_tc_flag==1){
+	
+	   HLW8032_ParseData();
+	}
+
+
+	if(gpro_t.gTimer_read_total_w >3){
+	  gpro_t.gTimer_read_total_w=0;
+	   hlw8032_output_value();
+	}
+
+}
+/*
+	*@brief: interrupt DMA callback
+	*@note:
+	*@param:
+	*@retval:
+*/
 
 
 
